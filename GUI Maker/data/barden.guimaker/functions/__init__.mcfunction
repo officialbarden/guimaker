@@ -2,6 +2,8 @@ scoreboard objectives add bgui-createGUIinstance trigger
 scoreboard players enable @a[gamemode=creative] bgui-createGUIinstance
 scoreboard objectives add bgui-createGUIpage trigger
 scoreboard players enable @a[gamemode=creative] bgui-createGUIpage
+scoreboard objectives add bgui-getListofAllGuis trigger
+scoreboard players enable @a[gamemode=creative] bgui-getListofAllGuis
 
 scoreboard objectives add bgui.id dummy
 scoreboard players add .global bgui-id 1

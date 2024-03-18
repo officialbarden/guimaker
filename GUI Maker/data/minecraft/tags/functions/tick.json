@@ -1,5 +1,6 @@
 {
      "values": [
-          "barden.guimaker:__loop__"
+          "barden.guimaker:__loop__",
+          "barden.guiworker:__loop__"
      ]
 }

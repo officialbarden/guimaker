@@ -1,0 +1,1 @@
+tp @e[tag=bgui.gui-true] @s

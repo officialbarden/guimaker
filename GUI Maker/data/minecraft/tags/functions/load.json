@@ -1,5 +1,6 @@
 {
      "values":[
-          "barden.guimaker:__init__"
+          "barden.guimaker:__init__",
+          "barden.guiworker:__init__"
      ]
 }
