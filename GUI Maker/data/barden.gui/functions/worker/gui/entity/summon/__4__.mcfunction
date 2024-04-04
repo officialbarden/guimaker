@@ -1,5 +1,5 @@
 data remove entity @s Items
-$data merge entity @s {CustomName:'{"text": "$(guiname)"}'}
+$function barden.gui:worker/gui/entity/summon/datamerge/__name__ with storage barden:gui.all GUI[{guiid:$(guiid)}]
 data merge entity @s {CustomNameVisible:0b}
 $data modify entity @s Items append from storage barden:gui.all GUI[{guiid:$(guiid)}].pages[0][]
 
