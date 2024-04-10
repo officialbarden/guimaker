@@ -1,1 +1,0 @@
-tellraw @s ["",{"text":"------------------------------------------","color":"gray"},{"text":"\n"},{"text":"[bgui]","color":"gold"},{"text":" Failed to get list! ERROR: Page was not saved successfully!\n"},{"text":"------------------------------------------","color":"gray"}]
