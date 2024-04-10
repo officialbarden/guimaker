@@ -8,7 +8,7 @@ $data modify storage barden:gui.entity.all.gui.link all_connections[{"guiid":$(G
 #say connection appended!
 
 
-$function barden.gui:worker/gui/entity/summon/__4__ with storage barden:gui.all GUI[{guiid:$(GUI_ID)}]
+$function barden.gui:worker/gui/entity/summon/__4__ {"GUI_ID":$(GUI_ID),"PAGE":$(PAGE)}
 
 
 execute as @e[type=chest_minecart,tag=bgui.gui-true,limit=1] if entity @e[type=marker,sort=nearest,tag=bgui.marker.itemchangecheck,tag=!bgui.check] positioned ~ ~ ~ run function barden.gui:worker/gui/entity/summon/page_check_setup/__1__ with entity @e[type=marker,sort=nearest,limit=1,tag=bgui.marker.itemchangecheck] data
