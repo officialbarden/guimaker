@@ -1,3 +1,4 @@
+
 $data remove storage barden:gui.page.init PAGEINIT[{uuid:$(minecartuuid)}]
 $data remove storage barden:gui.page.init PAGEFINAL[{uuid:$(minecartuuid)}]
 

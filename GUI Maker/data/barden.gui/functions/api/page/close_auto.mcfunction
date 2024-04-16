@@ -1,0 +1,1 @@
+function barden.gui:command/close/gui

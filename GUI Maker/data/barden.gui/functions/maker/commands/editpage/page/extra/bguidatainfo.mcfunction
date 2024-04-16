@@ -1,0 +1,1 @@
+$tellraw @s ["",{"text":"function file: ","color":"white"},{"text":"$(bguiFunction)","color":"gold"},{"text":"\n"},{"text":"item modifier: ","color":"white"},{"text":"$(bguiItemModifier)","color":"gold"}]

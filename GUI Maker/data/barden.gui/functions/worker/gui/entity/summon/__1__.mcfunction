@@ -1,3 +1,4 @@
+
 # $(GUI_ID)
 # $(PAGE)
 execute if score @s bgui.entity.linking = @e[type=chest_minecart,tag=bgui.gui-true,sort=nearest,limit=1] bgui.entity.linking run kill @e[tag=bgui.gui-true,sort=nearest,limit=1]
