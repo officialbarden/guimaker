@@ -1,1 +1,0 @@
-$data merge entity @s {CustomName:'{"text": "$(guiname)"}'}

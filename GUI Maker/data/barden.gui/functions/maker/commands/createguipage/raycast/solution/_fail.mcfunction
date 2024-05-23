@@ -1,1 +1,0 @@
-tellraw @s {"text": "[bgui] the block is more than 5 blocks away!"}

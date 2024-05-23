@@ -1,1 +1,0 @@
-$clear @s $(id)$(tag)
