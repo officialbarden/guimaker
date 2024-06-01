@@ -1,0 +1,4 @@
+$give @s[tag=!gm.editing_page] phantom_spawn_egg{display:{Name:'{"text":"gui_id=$(GUI_ID),page=$(page_number)"}'},EntityTag:{Tags:["gm.gui.container.place","gm.gui.block"],id:"minecraft:marker",data:{GUI_ID:$(GUI_ID),page_number:$(page_number)}}} 1
+
+$execute as @s[tag=gm.editing_page] at @s run function gui.maker:maker/gui/edit_page/tellraw/2 {GUI_ID:$(GUI_ID),PAGE:$(page_number)}
+# function gui.maker:maker/gui/edit_page/tellraw/1 with entity @e[type=marker,tag=gm.clicked,sort=nearest,limit=1] data
