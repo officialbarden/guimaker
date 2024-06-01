@@ -1,2 +1,0 @@
-$tellraw @s ["",{"text":"--------------------------------\n[","color":"#BFFFF5"},{"text":"G","color":"#C1FAF6"},{"text":"U","color":"#C3F5F7"},{"text":"I ","color":"#C5F0F8"},{"text":"M","color":"#C7EBF9"},{"text":"a","color":"#CAE6FA"},{"text":"k","color":"#CCE1FB"},{"text":"e","color":"#CEDCFC"},{"text":"r","color":"#D0D7FD"},{"text":"] GUI Created!\n\n\u25b6 $(GUI_NAME)\n\u25b6 $(GUI_ID)","color":"#D3D3FF"},{"text":"\n"},{"text":"--------------------------------","color":"#BFFFF5"}]
-playsound minecraft:block.note_block.bit master @s ~ ~ ~ 1 0 0
