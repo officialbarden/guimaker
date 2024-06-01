@@ -1,0 +1,1 @@
+$give @s phantom_spawn_egg{display:{Name:'{"text":"gui_id=$(GUI_ID),page=$(PAGE)"}'},EntityTag:{Tags:["gm.gui.container.place","gm.gui.block"],id:"minecraft:marker",data:{GUI_ID:$(GUI_ID),page_number:$(PAGE)}}} 1
