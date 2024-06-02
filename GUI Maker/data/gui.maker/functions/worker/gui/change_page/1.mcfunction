@@ -15,5 +15,7 @@ $execute as @s[tag=gm.gui.block] at @s run data modify entity @s data.PAGE.FINAL
 $execute as @s[tag=gm.gui.block] at @s run data modify entity @s data.PAGE_INFO.GUI_ID set value "$(change_gui)"
 $execute as @s[tag=gm.gui.block] at @s run data modify entity @s data.PAGE_INFO.PAGE set value "$(change_page)"
 
+$function gui.maker:worker/gui/change_name/1 {GUI_ID:$(change_gui),PAGE:$(change_page)}
+
 tag @s remove gm.clicked
 tag @s add gm.itemcheck
