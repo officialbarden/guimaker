@@ -1,0 +1,2 @@
+$execute at @e[type=marker,sort=nearest,limit=1,tag=gm.gui.cm,distance=..2] run item modify entity @e[type=chest_minecart,sort=nearest,limit=1,tag=gm.gui.ui] container.$(Slot) $(Modifier)
+$execute at @e[type=marker,sort=nearest,limit=1,tag=gm.gui.block,distance=..2] run item modify block ~ ~ ~ container.$(Slot) $(Modifier)
