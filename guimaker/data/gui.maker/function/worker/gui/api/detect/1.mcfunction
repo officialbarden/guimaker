@@ -1,0 +1,2 @@
+execute as @e[sort=nearest,limit=1,type=chest_minecart,tag=gm.gui.ui,dx=0] if items entity @s container.* pink_stained_glass_pane[custom_data~{gm.API:true}] run return run function gui.maker:worker/gui/api/clone/1
+execute as @s[type=marker,tag=gm.gui.block] if items block ~ ~ ~ container.* pink_stained_glass_pane[custom_data~{gm.API:true}] run return run function gui.maker:worker/gui/api/clone/1
