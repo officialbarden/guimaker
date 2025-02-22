@@ -1,4 +1,0 @@
-tellraw @s {"text":">> You must have OPERATOR to run this function!","color": "gray","italic": true}
-tellraw @s {"text":"[Click here to get Stained Glass]","bold":true,"color":"#FFC300","clickEvent":{"action":"suggest_command","value":"/function gui.maker:maker/api/func/1 {\"storage\":\"storageName\",\"path\":\"Path\"}"},"hoverEvent":{"action":"show_text","contents":"Replace \"storageName\" with your storage name. Replace \"Path\" with your storage Path. Make sure that the Path is a list/array! Only put it as \"Path\" and not \"Path[]\"!!"}}
-scoreboard players reset @s gm-getApiSlotPlaceholder
-scoreboard players enable @s gm-getApiSlotPlaceholder

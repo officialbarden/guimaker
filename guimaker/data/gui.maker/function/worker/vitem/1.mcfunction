@@ -1,3 +1,0 @@
-tellraw @s ["",{"text":">> you must have OPERATOR for this function!","italic":true,"color":"gray","clickEvent":{"action":"suggest_command","value":"/function gui.maker:worker/vitem/set_data {gui_id:\"\",page:\"\"}"}},{"text":"\n","clickEvent":{"action":"suggest_command","value":"/function gui.maker:worker/vitem/set_data {gui_id:\"\",page:\"\"}"}},{"text":"[Click to Set Data for Mainhand Item]","bold":true,"color":"gold","clickEvent":{"action":"suggest_command","value":"/function gui.maker:worker/vitem/set_data {gui_id:\"\",page:\"\"}"}}]
-scoreboard players reset @s gm-convertHandItemtoVItem
-scoreboard players enable @s gm-convertHandItemtoVItem

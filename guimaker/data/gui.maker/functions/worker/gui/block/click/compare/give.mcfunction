@@ -1,1 +1,0 @@
-$give @s $(id)$(tag) $(Count)
