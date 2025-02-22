@@ -1,7 +1,7 @@
 # Barrel
     execute as @s[tag=_gui.barrel,type=marker] at @s if block ~ ~ ~ barrel store success score @s gm.Tests run data modify entity @s data.Items set from block ~ ~ ~ Items
 # Chest Minecart
-    execute as @s[tag=_gui.chestminecart,type=marker] at @s on vehicle if entity @s[type=chest_minecart] on passengers as @s[type=marker,tag=_gui.chestminecart] store success score @s gm.Tests run data modify entity @s data.Items set from block ~ ~ ~ Items
+    execute as @s[tag=_gui.chestminecart,type=marker] at @s on vehicle if entity @s[type=chest_minecart] on passengers as @s[type=marker,tag=_gui.chestminecart] store success score @s gm.Tests run data modify entity @s data.Items set from entity @n[type=chest_minecart,tag=_gui.chestminecart] Items
 
 # STORE INITIAL/FINAL ITEM COUNT
 execute unless score @s gm.Tests matches 1 run data modify entity @s data.Items_init set from entity @s data.Items
