@@ -1,3 +1,4 @@
+
 setblock 0 300 0 chest
 data modify block 0 300 0 Items set from entity @s data.Items_final
 $item replace entity $(player) player.cursor from block 0 300 0 container.$(Slot)
