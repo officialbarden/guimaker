@@ -1,2 +1,2 @@
-execute if items entity @s player.cursor *[custom_data~{gui_itemholdercached:true}] run function gm:zprivate/caching/item_holder/cached/component_remove2
-execute if items entity @s container.* *[custom_data~{gui_itemholdercached:true}] run function gm:zprivate/caching/item_holder/cached/component_remove3 with entity @s Inventory[{components:{"minecraft:custom_data":{gui_itemholdercached:true}}}]
+execute as @p if items entity @s player.cursor *[custom_data~{gui_itemholdercached:true}] run function gm:zprivate/caching/item_holder/cached/component_remove2
+execute as @p if items entity @s container.* *[custom_data~{gui_itemholdercached:true}] run function gm:zprivate/caching/item_holder/cached/component_remove3 with entity @s Inventory[{components:{"minecraft:custom_data":{gui_itemholdercached:true}}}]

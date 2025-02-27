@@ -1,4 +1,4 @@
-execute as @p unless items entity @s player.cursor * run return fail
+execute unless data entity @s data.Items_final[0] run return fail
 
 execute as @p run function gu:generate
 data modify storage gm:storage temp.macro.player set from storage gu:main out

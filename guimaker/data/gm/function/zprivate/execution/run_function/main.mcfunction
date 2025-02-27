@@ -1,3 +1,4 @@
+data modify storage gm:storage temp.macro.item_nbt set from entity @s data.Items_init[0]
 data modify storage gm:storage temp.macro.function_file set from entity @s data.Items_init[0]."components"."minecraft:custom_data".gui.execute.function
 data modify storage gm:storage temp.macro.command set from entity @s data.Items_init[0]."components"."minecraft:custom_data".gui.execute.command
 
