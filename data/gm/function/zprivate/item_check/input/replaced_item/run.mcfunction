@@ -3,11 +3,13 @@
 #tellraw @a ["New Item:", {"nbt":"data.Items_final[0]","entity":"@s"}]
 
 tag @s add _gui.temp
-execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data":{"gui":{"item":"holder"}}}}] run function gm:zprivate/caching/item_holder/main
-execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data":{gui_itemholdercached:true}}}] run function gm:zprivate/caching/item_holder/main
 
 execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data":{"gui":{"item":"holder"}}}}] run function gm:zprivate/caching/toggle_button/main
 execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data":{gui_togglebuttoncached:true}}}] run function gm:zprivate/caching/toggle_button/main
+
+
+execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data":{"gui":{"item":"holder"}}}}] run function gm:zprivate/caching/item_holder/main
+execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data":{gui_itemholdercached:true}}}] run function gm:zprivate/caching/item_holder/main
 
 execute unless data entity @s data.Items_final[0] run function gm:zprivate/caching/item_holder/cached/uncache
 setblock 0 300 0 air
