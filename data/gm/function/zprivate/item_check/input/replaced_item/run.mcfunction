@@ -4,7 +4,7 @@
 
 tag @s add _gui.temp
 
-execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data":{"gui":{"item":"holder"}}}}] run function gm:zprivate/caching/toggle_button/main
+execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data":{"gui":{"item":"toggle_button"}}}}] run function gm:zprivate/caching/toggle_button/main
 execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data":{gui_togglebuttoncached:true}}}] run function gm:zprivate/caching/toggle_button/main
 
 
