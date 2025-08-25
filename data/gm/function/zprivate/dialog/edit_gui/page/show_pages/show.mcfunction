@@ -1,0 +1,1 @@
+$dialog show @s {type:"minecraft:multi_action",title:[{text:"GUI Maker v2.0 Menu - "},{text:"Edit Page",color:"#ff7b00",bold:1b}],body:{type:"minecraft:plain_message",contents:{text:"Click on the Page to Edit Contents."}},inputs:[],can_close_with_escape:1b,pause:0b,columns:1,actions:$(ACTIONS_LIST)}

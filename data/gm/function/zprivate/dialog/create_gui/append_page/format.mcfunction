@@ -1,0 +1,3 @@
+$data modify storage gm:storage temp.DIALOG.list.ACTIONS_LIST append value {"label":"GUI ID: $(GUI_ID)", "action":{"type":"run_command","command":"/function gm:zprivate/gui_create/page/main {GUI_ID:$(GUI_ID)}"}}
+data remove storage gm:storage temp.DIALOG.list.MAIN[0]
+execute if data storage gm:storage temp.DIALOG.list.MAIN[0] run function gm:zprivate/dialog/create_gui/append_page/format with storage gm:storage temp.DIALOG.list.MAIN[0]

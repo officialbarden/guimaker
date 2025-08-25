@@ -1,5 +1,8 @@
 # $(GUI_ID)
 
+execute at @s positioned ~ ~-1 ~ unless block ~ ~ ~ #gm:container run tellraw @s {"text":"| [GM] The Block is not a Container Block (must be chest/barrel/trapped chest)",color:"gray", "italic":true}
+execute at @s positioned ~ ~-1 ~ unless block ~ ~ ~ #gm:container run return 0
+
 $execute store result score $PageCount gm.Values run data get storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES
 scoreboard players add $PageCount gm.Values 1
 execute store result storage gm:storage temp.PAGES.PAGE int 1 run scoreboard players get $PageCount gm.Values
