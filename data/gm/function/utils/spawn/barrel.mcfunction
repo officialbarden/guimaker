@@ -1,0 +1,2 @@
+$function gm:zprivate/gui_spawn/barrel/main {GUI_ID:$(GUI_ID),PAGE:$(PAGE)}
+$tellraw @a ["",{"text":"| ","click_event":{"action":"suggest_command","command":"/function gm:utils/spawn/barrel {GUI_ID:$(GUI_ID),PAGE:$(PAGE)}"}},{"text":"Click here to Copy Spawn Command.","italic":true,"color":"gray","click_event":{"action":"suggest_command","command":"/function gm:utils/spawn/barrel {GUI_ID:$(GUI_ID),PAGE:$(PAGE)}"}}]
