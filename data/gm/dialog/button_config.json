@@ -1,0 +1,73 @@
+{
+    "type": "minecraft:multi_action",
+    "title": [
+        "GUI Maker v2.0 - Edit Button Config"
+    ],
+    "body": {
+        "type": "minecraft:plain_message",
+        "contents": {
+            "text": "Do not leave Inputs Empty."
+        }
+    },
+    "inputs": [
+        {
+            "type": "minecraft:text",
+            "key": "command",
+            "label": {
+                "text": "Set Command"
+            },
+            "label_visible": true
+        },
+        {
+            "type": "minecraft:text",
+            "key": "item_modifier",
+            "label": {
+                "text": "Set Item Modifier"
+            },
+            "label_visible": true
+        },
+        {
+            "type": "minecraft:text",
+            "key": "function",
+            "label": {
+                "text": "Set Function File"
+            },
+            "label_visible": true
+        },
+        {
+            "type": "minecraft:text",
+            "key": "change_to_guiid",
+            "label": {
+                "text": "Changes to GUI ID:"
+            }
+        },
+        {
+            "type": "minecraft:text",
+            "key": "change_to_page",
+            "label": {
+                "text": "Changes to PAGE:"
+            }
+        }
+    ],
+    "can_close_with_escape": true,
+    "pause": false,
+    "columns": 9,
+    "actions": [
+        {
+            "label": "Apply",
+            "width": 75,
+            "action": {
+                "type": "minecraft:dynamic/run_command",
+                "template": "function gm:zprivate/dialog/edit_gui/page/item_config/apply {command:\"$(command)\", function: \"$(function)\", item_modifier: \"$(item_modifier)\", change_to_guiid: \"$(change_to_guiid)\", change_to_page: $(change_to_page)}"
+            }
+        },
+        {
+            "label": "Reset",
+            "width": 75,
+            "action": {
+                "type": "minecraft:run_command",
+                "command": "function gm:zprivate/dialog/edit_gui/page/item_config/reset"
+            }
+        }
+    ]
+}

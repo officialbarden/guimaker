@@ -1,0 +1,51 @@
+{
+    "type": "minecraft:multi_action",
+    "title": [
+        "GUI Maker v2.0 - Edit Button Config"
+    ],
+    "body": {
+        "type": "minecraft:plain_message",
+        "contents": {
+            "text": "Do not leave Inputs Empty."
+        }
+    },
+    "inputs": [
+        {
+            "type": "minecraft:text",
+            "key": "command",
+            "label": {
+                "text": "Set Command"
+            },
+            "label_visible": true
+        },
+        {
+            "type": "minecraft:text",
+            "key": "item_modifier",
+            "label": {
+                "text": "Set Item Modifier"
+            },
+            "label_visible": true
+        },
+        {
+            "type": "minecraft:text",
+            "key": "function",
+            "label": {
+                "text": "Set Function File"
+            },
+            "label_visible": true
+        }
+    ],
+    "can_close_with_escape": true,
+    "pause": false,
+    "columns": 9,
+    "actions": [
+        {
+            "label": "Apply",
+            "width": 75,
+            "action": {
+                "type": "minecraft:dynamic/run_command",
+                "template": "function gm:zprivate/dialog/set_component {command:\"$(command)\", function: \"$(function)\", item_modifier: \"$(item_modifier)\"}"
+            }
+        }
+    ]
+}
