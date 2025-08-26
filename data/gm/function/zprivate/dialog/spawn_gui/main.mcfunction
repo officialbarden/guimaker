@@ -1,0 +1,1 @@
+function gm:zprivate/dialog/spawn_gui/page/main
