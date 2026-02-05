@@ -9,7 +9,8 @@ execute as @e[tag=_gui.marker,tag=_gui.barrel,type=marker] at @s unless block ~ 
 execute as @e[tag=_gui.marker,tag=_gui.chestminecart,type=marker] at @s unless entity @n[type=chest_minecart,distance=..1] run kill @s
 execute as @e[tag=_gui.chestminecart.itemdisplay,type=item_display] at @s unless entity @n[type=chest_minecart,distance=..1] run kill @s
 
-# Kill Items
+# Cleanup
+clear @a *[minecraft:custom_data~{GuiItem:1b}]
 kill @e[type=item,nbt={Item:{components:{"minecraft:custom_data":{gui:{}}}}}]
 kill @e[type=item,nbt={Item:{components:{"minecraft:custom_data":{gui_itemholdercached:true}}}}]
 kill @e[type=item,nbt={Item:{components:{"minecraft:custom_data":{gui_toggledbuttoncached:true}}}}]

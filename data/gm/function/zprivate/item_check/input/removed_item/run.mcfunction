@@ -14,7 +14,7 @@ function gm:zprivate/execution/run_function/main with storage gm:storage temp.ma
 function gm:zprivate/execution/playsound/main with storage gm:storage temp.macro
 function gm:zprivate/execution/change_menu/main with storage gm:storage temp.macro
 
-
+item replace entity @a player.cursor with minecraft:air
 
 clear @a *[custom_data~{gui:{}}]
 tag @s remove _gui.temp

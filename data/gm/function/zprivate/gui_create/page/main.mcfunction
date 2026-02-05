@@ -10,6 +10,8 @@ $data modify storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES append from storag
 $data modify storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS set from block ~ ~-1 ~ Items
 $execute unless data storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".gui run data modify storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".gui set value {execute:{function:"",item_modifier:"",command:""}}
 
+$execute unless data storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".GuiItem run data modify storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".GuiItem set value 1b
+
 $execute unless data storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".gui.item run data modify storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".gui.item set value "simple_button"
 
 
