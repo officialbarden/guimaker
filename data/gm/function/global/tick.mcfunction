@@ -13,3 +13,4 @@ execute as @e[tag=_gui.chestminecart.itemdisplay,type=item_display] at @s unless
 kill @e[type=item,nbt={Item:{components:{"minecraft:custom_data":{gui:{}}}}}]
 kill @e[type=item,nbt={Item:{components:{"minecraft:custom_data":{gui_itemholdercached:true}}}}]
 kill @e[type=item,nbt={Item:{components:{"minecraft:custom_data":{gui_toggledbuttoncached:true}}}}]
+clear @a *[minecraft:custom_data~{gui:{config:{NoPickup:1b}}}]

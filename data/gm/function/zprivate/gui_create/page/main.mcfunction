@@ -12,6 +12,7 @@ $execute unless data storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_C
 
 $execute unless data storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".gui.item run data modify storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".gui.item set value "simple_button"
 
+$execute unless data storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".gui.config run data modify storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[-1].PAGE_CONTENTS[].components."minecraft:custom_data".gui.config set value {NoPickup:1b}
 
 $data modify storage gm:storage temp.macro.GUI_ID set value $(GUI_ID)
 execute store result storage gm:storage temp.macro.PAGE int 1 run scoreboard players get $PageCount gm.Values
