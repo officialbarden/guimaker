@@ -14,7 +14,8 @@ execute if data entity @s data.Items_init[{"components":{"minecraft:custom_data"
 execute unless data entity @s data.Items_final[0] run function gm:zprivate/caching/item_holder/cached/uncache
 setblock 0 300 0 air
 
-execute as @p run function gu:generate
+execute as @p[sort=arbitrary,limit=1] at @s positioned ~ ~ ~ rotated as @s[type=minecraft:player] anchored eyes run function gu:generate
+
 data modify storage gm:storage temp.macro.player set from storage gu:main out
 function gm:zprivate/execution/run_function/main with storage gm:storage temp.macro
 function gm:zprivate/execution/playsound/main with storage gm:storage temp.macro
