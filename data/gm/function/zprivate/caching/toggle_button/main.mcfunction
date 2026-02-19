@@ -1,4 +1,5 @@
-execute as @p run function gu:generate
+execute as @p[sort=arbitrary,limit=1] at @s positioned ~ ~ ~ rotated as @s if entity @s anchored eyes run function gu:generate
+
 data modify storage gm:storage temp.macro.player set from storage gu:main out
 data modify storage gm:storage temp.macro.GUI_ID set from entity @s data.gui.ID
 data modify storage gm:storage temp.macro.PAGE set from entity @s data.gui.PAGE
