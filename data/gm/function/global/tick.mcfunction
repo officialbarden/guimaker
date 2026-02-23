@@ -13,3 +13,7 @@ execute as @e[tag=_gui.chestminecart.itemdisplay,type=item_display] at @s unless
 kill @e[type=item,nbt={Item:{components:{"minecraft:custom_data":{gui:{}}}}}]
 kill @e[type=item,nbt={Item:{components:{"minecraft:custom_data":{gui_itemholdercached:true}}}}]
 kill @e[type=item,nbt={Item:{components:{"minecraft:custom_data":{gui_toggledbuttoncached:true}}}}]
+
+# Vitem Toggle
+execute as @a[tag=!gm.holdingVITEM] at @s if items entity @s weapon.mainhand *[custom_data~{gm.VITEM:true}] run function gm:zprivate/vitem/open_gui
+execute as @a[tag=gm.holdingVITEM] at @s unless items entity @s weapon.mainhand *[custom_data~{gm.VITEM:true}] run function gm:zprivate/vitem/close_gui
