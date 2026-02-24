@@ -52,6 +52,14 @@
         "text": "Changes to PAGE:"
       },
       "max_length": 9999999
+    },
+    {
+      "type": "minecraft:boolean",
+      "key": "close_gui",
+      "label": "Close GUI on Click",
+      "initial": true,
+      "on_true": "true",
+      "on_false": "false"
     }
   ],
   "can_close_with_escape": true,
@@ -63,7 +71,7 @@
       "width": 75,
       "action": {
         "type": "minecraft:dynamic/run_command",
-        "template": "function gm:zprivate/dialog/edit_gui/page/item_config/apply {command:\"$(command)\", function: \"$(function)\", item_modifier: \"$(item_modifier)\", change_to_guiid: \"$(change_to_guiid)\", change_to_page: $(change_to_page)}"
+        "template": "function gm:zprivate/dialog/edit_gui/page/item_config/apply {command:\"$(command)\", function: \"$(function)\", close_gui:$(close_gui) ,item_modifier: \"$(item_modifier)\", change_to_guiid: \"$(change_to_guiid)\", change_to_page: $(change_to_page)}"
       }
     },
     {
