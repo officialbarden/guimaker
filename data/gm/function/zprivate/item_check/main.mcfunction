@@ -15,4 +15,3 @@ execute if score @s gm.Tests matches 1 store result score $FinalContents gm.Valu
 execute if score @s gm.Tests matches 1 if score $FinalContents gm.Values = $InitialContents gm.Values run return run function gm:zprivate/item_check/input/replaced_item/main
 execute if score @s gm.Tests matches 1 if score $FinalContents gm.Values > $InitialContents gm.Values run return run function gm:zprivate/item_check/input/added_item/main
 execute if score @s gm.Tests matches 1 if score $FinalContents gm.Values < $InitialContents gm.Values run return run function gm:zprivate/item_check/input/removed_item/main
-

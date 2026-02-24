@@ -58,8 +58,8 @@
       "key": "close_gui",
       "label": "Close GUI on Click",
       "initial": true,
-      "on_true": "1",
-      "on_false": "0"
+      "on_true": "true",
+      "on_false": "false"
     }
   ],
   "can_close_with_escape": true,
@@ -84,4 +84,3 @@
     }
   ]
 }
-

@@ -1,1 +1,1 @@
-$playsound $(sound)
+$playsound $(sound) master @s ~ ~ ~ 

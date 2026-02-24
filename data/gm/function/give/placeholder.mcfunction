@@ -1,0 +1,1 @@
+$give @s $(item)[custom_data={gui:{item:"placeholder",execute:{commands:[]}}}]
