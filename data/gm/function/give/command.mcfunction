@@ -1,1 +1,0 @@
-$give @s $(item)[minecraft:custom_data={"gui":{"execute":{"command":"$(command))","close_gui":$(close_gui)}}}]
