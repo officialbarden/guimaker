@@ -57,6 +57,6 @@ jobs:
 
       - name: Attach jar to release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v4
+        uses: softprops/action-gh-release@v3
         with:
           files: ${{ steps.artifact.outputs.path }}
