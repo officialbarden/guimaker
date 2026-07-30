@@ -18,7 +18,7 @@ public final class GuiButtonExecutor {
             return false;
         }
         if (!ActionAllowlistGate.isAllowed(action, rawParameter)) {
-            player.sendMessage(Text.literal("GUI Maker: Geçersiz veya izin verilmeyen eylem.")
+            player.sendMessage(Text.literal("GUI Maker: Invalid or disallowed action.")
                     .formatted(Formatting.RED), false);
             return false;
         }
@@ -37,6 +37,7 @@ public final class GuiButtonExecutor {
                 GuiItemGiver.give(player, rawParameter);
                 yield true;
             }
+            case RUN_COMMAND -> GatedCommandExecutor.execute(player, rawParameter);
             case NO_OP -> true;
         };
     }
@@ -44,7 +45,7 @@ public final class GuiButtonExecutor {
     private static boolean openPage(ServerPlayerEntity player, String guiId, String parameter) {
         int pageId = Integer.parseInt(parameter.strip());
         if (!GuiRepository.requireGui(guiId).hasPage(pageId)) {
-            player.sendMessage(Text.literal("GUI Maker: Hedef sayfa artık mevcut değil.")
+            player.sendMessage(Text.literal("GUI Maker: The target page no longer exists.")
                     .formatted(Formatting.RED), false);
             return false;
         }

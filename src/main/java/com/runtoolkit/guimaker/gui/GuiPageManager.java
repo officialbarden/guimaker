@@ -57,7 +57,7 @@ public final class GuiPageManager {
         player.openHandledScreen(new NamedScreenHandlerFactory() {
             @Override
             public Text getDisplayName() {
-                return Text.literal("Düzenle: " + gui.id() + " #" + page.id());
+                return Text.literal("Edit: " + gui.id() + " #" + page.id());
             }
 
             @Override

@@ -3,7 +3,7 @@
   "id": "guimaker",
   "version": "${version}",
   "name": "GUI Maker",
-  "description": "Persistent, in-game GUI builder with safe allowlisted actions, page editing and vanilla chest screens.",
+  "description": "Persistent in-game GUI builder with gated command presets, safe allowlisted actions and vanilla chest screens.",
   "authors": ["Legends11", "runtoolkit"],
   "contact": {
     "sources": "https://github.com/runtoolkit/guimaker-fabric"

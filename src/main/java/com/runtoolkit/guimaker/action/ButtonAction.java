@@ -29,6 +29,10 @@ public enum ButtonAction {
     // Gives the player a fixed, predefined item on click.
     GIVE_ITEM,
 
+    // Executes a server-owned command preset after permission and cooldown gates.
+    // The parameter is a preset ID, never raw command text.
+    RUN_COMMAND,
+
     // Does nothing on click (decorative/visual-only button).
     NO_OP;
 

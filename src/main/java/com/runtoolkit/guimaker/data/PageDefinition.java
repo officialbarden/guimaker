@@ -17,7 +17,7 @@ public final class PageDefinition {
 
     public PageDefinition(int id, String title, int rows) {
         if (id < 0 || id > 9999) {
-            throw new IllegalArgumentException("Sayfa kimliği 0-9999 arasında olmalıdır.");
+            throw new IllegalArgumentException("The page ID must be between 0 and 9999.");
         }
         validateRows(rows);
         this.id = id;
@@ -98,13 +98,13 @@ public final class PageDefinition {
 
     private void validateSlot(int slot) {
         if (slot < 0 || slot >= size()) {
-            throw new IllegalArgumentException("Slot bu sayfa için geçersiz (0-" + (size() - 1) + ").");
+            throw new IllegalArgumentException("The slot is invalid for this page (0-" + (size() - 1) + ").");
         }
     }
 
     public static void validateRows(int rows) {
         if (rows < 1 || rows > 6) {
-            throw new IllegalArgumentException("Satır sayısı 1-6 arasında olmalıdır.");
+            throw new IllegalArgumentException("The row count must be between 1 and 6.");
         }
     }
 

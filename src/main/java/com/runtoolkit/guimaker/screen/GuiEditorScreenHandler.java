@@ -52,7 +52,7 @@ public final class GuiEditorScreenHandler extends GenericContainerScreenHandler 
                 GuiRepository.clearButton(guiId, pageId, slotIndex);
                 editorInventory.setStack(slotIndex, ItemStack.EMPTY);
                 sendContentUpdates();
-                serverPlayer.sendMessage(Text.literal("Slot " + slotIndex + " temizlendi.")
+                serverPlayer.sendMessage(Text.literal("Slot " + slotIndex + " cleared.")
                         .formatted(Formatting.YELLOW), true);
                 return;
             }
@@ -62,8 +62,8 @@ public final class GuiEditorScreenHandler extends GenericContainerScreenHandler 
                 ButtonDefinition current = GuiRepository.requirePage(guiId, pageId).button(slotIndex);
                 String action = current == null ? "NO_OP" : current.action().name()
                         + (current.parameter().isEmpty() ? "" : " (" + current.parameter() + ")");
-                serverPlayer.sendMessage(Text.literal("Ana eliniz boş. Slot " + slotIndex
-                        + " eylemi: " + action).formatted(Formatting.GRAY), true);
+                serverPlayer.sendMessage(Text.literal("Your main hand is empty. Slot " + slotIndex
+                        + " action: " + action).formatted(Formatting.GRAY), true);
                 return;
             }
 
@@ -71,7 +71,7 @@ public final class GuiEditorScreenHandler extends GenericContainerScreenHandler 
             editorInventory.setStack(slotIndex, held.copy());
             sendContentUpdates();
             serverPlayer.sendMessage(Text.literal("Slot " + slotIndex
-                    + " ana elinizdeki eşyayla güncellendi.").formatted(Formatting.GREEN), true);
+                    + " was updated with the item in your main hand.").formatted(Formatting.GREEN), true);
         } catch (IllegalArgumentException error) {
             serverPlayer.sendMessage(Text.literal("GUI Maker: " + error.getMessage())
                     .formatted(Formatting.RED), true);

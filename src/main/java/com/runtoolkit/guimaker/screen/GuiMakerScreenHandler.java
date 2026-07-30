@@ -66,7 +66,7 @@ public final class GuiMakerScreenHandler extends GenericContainerScreenHandler {
             case 4 -> ScreenHandlerType.GENERIC_9X4;
             case 5 -> ScreenHandlerType.GENERIC_9X5;
             case 6 -> ScreenHandlerType.GENERIC_9X6;
-            default -> throw new IllegalArgumentException("Satır sayısı 1-6 olmalıdır.");
+            default -> throw new IllegalArgumentException("The row count must be between 1 and 6.");
         };
     }
 

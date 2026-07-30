@@ -1,6 +1,7 @@
 package com.runtoolkit.guimaker;
 
 import com.runtoolkit.guimaker.data.GuiRepository;
+import com.runtoolkit.guimaker.gate.CommandExecutionGate;
 import com.runtoolkit.guimaker.gate.RateLimitGate;
 import com.runtoolkit.guimaker.gui.GuiEditCommand;
 import net.fabricmc.api.ModInitializer;
@@ -23,9 +24,11 @@ public final class GuiMakerMod implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(GuiRepository::load);
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> GuiRepository.close());
 
-        ServerPlayConnectionEvents.DISCONNECT.register(
-                (handler, server) -> RateLimitGate.clear(handler.getPlayer().getUuid()));
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            RateLimitGate.clear(handler.getPlayer().getUuid());
+            CommandExecutionGate.clearPlayer(handler.getPlayer().getUuid());
+        });
 
-        LOGGER.info("GUI Maker başlatıldı.");
+        LOGGER.info("GUI Maker initialized.");
     }
 }

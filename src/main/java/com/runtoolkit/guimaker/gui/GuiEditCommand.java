@@ -10,6 +10,7 @@ import com.runtoolkit.guimaker.action.ButtonAction;
 import com.runtoolkit.guimaker.data.GuiDefinition;
 import com.runtoolkit.guimaker.data.GuiRepository;
 import com.runtoolkit.guimaker.data.PageDefinition;
+import com.runtoolkit.guimaker.gate.CommandPresetRegistry;
 import com.runtoolkit.guimaker.gate.ItemPresetRegistry;
 import com.runtoolkit.guimaker.gate.PermissionGate;
 import com.runtoolkit.guimaker.gate.SoundRegistry;
@@ -43,6 +44,7 @@ public final class GuiEditCommand {
                 Collection<String> values = switch (action) {
                     case PLAY_SOUND -> SoundRegistry.ids();
                     case GIVE_ITEM -> ItemPresetRegistry.ids();
+                    case RUN_COMMAND -> CommandPresetRegistry.ids();
                     case OPEN_PAGE -> pageIdsFromContext(context);
                     default -> java.util.List.of();
                 };
@@ -56,6 +58,8 @@ public final class GuiEditCommand {
                 .executes(context -> help(context.getSource()))
                 .then(literal("help").executes(context -> help(context.getSource())))
                 .then(literal("list").executes(context -> list(context.getSource())))
+                .then(literal("commands").requires(PermissionGate::canEditGui)
+                        .executes(context -> listCommandPresets(context.getSource())))
                 .then(literal("open")
                         .then(argument("gui", StringArgumentType.word()).suggests(GUI_IDS)
                                 .executes(context -> open(context, null))
@@ -119,26 +123,42 @@ public final class GuiEditCommand {
     }
 
     private static int help(ServerCommandSource source) {
-        source.sendMessage(Text.literal("GUI Maker komutları").formatted(Formatting.GOLD, Formatting.BOLD));
-        source.sendMessage(Text.literal("/guimaker list | open <gui> [sayfa]").formatted(Formatting.YELLOW));
+        source.sendMessage(Text.literal("GUI Maker commands").formatted(Formatting.GOLD, Formatting.BOLD));
+        source.sendMessage(Text.literal("/guimaker list | open <gui> [page]").formatted(Formatting.YELLOW));
         if (PermissionGate.canEditGui(source)) {
-            source.sendMessage(Text.literal("/guimaker create <gui> <1-6 satır> <başlık>").formatted(Formatting.AQUA));
-            source.sendMessage(Text.literal("/guimaker edit <gui> [sayfa] — sol tık: eldeki eşyayı kopyala, sağ tık: temizle")
+            source.sendMessage(Text.literal("/guimaker create <gui> <1-6 rows> <title>").formatted(Formatting.AQUA));
+            source.sendMessage(Text.literal("/guimaker edit <gui> [page] — left click: copy held item, right click: clear")
                     .formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("/guimaker page add|remove ... | item set|clear ... | action set|clear ...")
                     .formatted(Formatting.AQUA));
-            source.sendMessage(Text.literal("Slot numaraları 0'dan başlar.").formatted(Formatting.GRAY));
+            source.sendMessage(Text.literal("/guimaker commands — list gated command presets")
+                    .formatted(Formatting.AQUA));
+            source.sendMessage(Text.literal("Slot numbers start at 0.").formatted(Formatting.GRAY));
         }
         return 1;
     }
 
     private static int list(ServerCommandSource source) {
-        source.sendMessage(Text.literal("Kayıtlı GUI'ler:").formatted(Formatting.GOLD));
+        source.sendMessage(Text.literal("Registered GUIs:").formatted(Formatting.GOLD));
         for (GuiDefinition gui : GuiRepository.all()) {
             String pages = gui.pages().stream().map(page -> Integer.toString(page.id()))
                     .collect(java.util.stream.Collectors.joining(", "));
-            source.sendMessage(Text.literal("- " + gui.id() + " (sayfalar: " + pages + ")")
+            source.sendMessage(Text.literal("- " + gui.id() + " (pages: " + pages + ")")
                     .formatted(Formatting.YELLOW));
+        }
+        return 1;
+    }
+
+    private static int listCommandPresets(ServerCommandSource source) {
+        source.sendMessage(Text.literal("Gated command presets:").formatted(Formatting.GOLD));
+        for (CommandPresetRegistry.CommandPreset preset : CommandPresetRegistry.all()) {
+            source.sendMessage(Text.literal("- " + preset.id()
+                    + " [as=" + preset.runAs()
+                    + ", required_permission=" + preset.requiredPlayerPermissionLevel()
+                    + ", server_level=" + preset.serverPermissionLevel()
+                    + ", cooldown=" + preset.cooldownMs() + "ms]")
+                    .formatted(Formatting.YELLOW));
+            source.sendMessage(Text.literal("  /" + preset.command()).formatted(Formatting.GRAY));
         }
         return 1;
     }
@@ -150,7 +170,7 @@ public final class GuiEditCommand {
             GuiDefinition gui = GuiRepository.requireGui(guiId);
             int pageId = requestedPage == null ? gui.firstPageId() : requestedPage;
             if (!GuiPageManager.openGui(player, gui.id(), pageId)) {
-                return error(context.getSource(), "Sayfa bulunamadı: " + pageId);
+                return error(context.getSource(), "Page not found: " + pageId);
             }
             return 1;
         } catch (IllegalArgumentException error) {
@@ -161,7 +181,7 @@ public final class GuiEditCommand {
     private static int editFirst(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         String first = GuiRepository.ids().stream().findFirst().orElse(null);
         if (first == null) {
-            return error(context.getSource(), "Düzenlenecek GUI yok.");
+            return error(context.getSource(), "No GUI is available to edit.");
         }
         ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
         GuiDefinition gui = GuiRepository.requireGui(first);
@@ -177,7 +197,7 @@ public final class GuiEditCommand {
             GuiDefinition gui = GuiRepository.requireGui(guiId);
             int pageId = requestedPage == null ? gui.firstPageId() : requestedPage;
             if (!GuiPageManager.openEditor(player, gui.id(), pageId)) {
-                return error(context.getSource(), "Sayfa bulunamadı: " + pageId);
+                return error(context.getSource(), "Page not found: " + pageId);
             }
             showEditorInstructions(player);
             return 1;
@@ -192,7 +212,7 @@ public final class GuiEditCommand {
             int rows = IntegerArgumentType.getInteger(context, "rows");
             String title = StringArgumentType.getString(context, "title");
             GuiRepository.create(id, rows, title);
-            return success(context.getSource(), "GUI oluşturuldu: " + id + " (sayfa 0)");
+            return success(context.getSource(), "GUI created: " + id + " (page 0)");
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }
@@ -202,7 +222,7 @@ public final class GuiEditCommand {
         try {
             String id = StringArgumentType.getString(context, "gui");
             GuiRepository.delete(id);
-            return success(context.getSource(), "GUI silindi: " + id);
+            return success(context.getSource(), "GUI deleted: " + id);
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }
@@ -215,7 +235,7 @@ public final class GuiEditCommand {
             int rows = IntegerArgumentType.getInteger(context, "rows");
             String title = StringArgumentType.getString(context, "title");
             GuiRepository.addPage(id, page, rows, title);
-            return success(context.getSource(), id + " GUI'sine sayfa eklendi: " + page);
+            return success(context.getSource(), id + ": page added: " + page);
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }
@@ -226,7 +246,7 @@ public final class GuiEditCommand {
             String id = StringArgumentType.getString(context, "gui");
             int page = IntegerArgumentType.getInteger(context, "page");
             GuiRepository.removePage(id, page);
-            return success(context.getSource(), "Sayfa silindi: " + page);
+            return success(context.getSource(), "Page removed: " + page);
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }
@@ -240,7 +260,7 @@ public final class GuiEditCommand {
             int slot = IntegerArgumentType.getInteger(context, "slot");
             ItemStack held = player.getMainHandStack();
             GuiRepository.setItem(id, page, slot, held);
-            return success(context.getSource(), "Slot " + slot + " görünümü güncellendi.");
+            return success(context.getSource(), "Slot " + slot + " display updated.");
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }
@@ -252,7 +272,7 @@ public final class GuiEditCommand {
             int page = IntegerArgumentType.getInteger(context, "page");
             int slot = IntegerArgumentType.getInteger(context, "slot");
             GuiRepository.clearButton(id, page, slot);
-            return success(context.getSource(), "Slot " + slot + " tamamen temizlendi.");
+            return success(context.getSource(), "Slot " + slot + " completely cleared.");
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }
@@ -265,7 +285,7 @@ public final class GuiEditCommand {
             int slot = IntegerArgumentType.getInteger(context, "slot");
             ButtonAction action = parseAction(StringArgumentType.getString(context, "action"));
             GuiRepository.setAction(id, page, slot, action, parameter);
-            return success(context.getSource(), "Slot " + slot + " eylemi: " + action.name());
+            return success(context.getSource(), "Slot " + slot + " action: " + action.name());
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }
@@ -277,7 +297,7 @@ public final class GuiEditCommand {
             int page = IntegerArgumentType.getInteger(context, "page");
             int slot = IntegerArgumentType.getInteger(context, "slot");
             GuiRepository.clearAction(id, page, slot);
-            return success(context.getSource(), "Slot " + slot + " eylemi temizlendi.");
+            return success(context.getSource(), "Slot " + slot + " action cleared.");
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }
@@ -285,7 +305,7 @@ public final class GuiEditCommand {
 
     private static int reload(CommandContext<ServerCommandSource> context) {
         GuiRepository.reload(context.getSource().getServer());
-        return success(context.getSource(), "Yapılandırma diskten yeniden yüklendi.");
+        return success(context.getSource(), "Configuration reloaded from disk.");
     }
 
     private static ButtonAction parseAction(String raw) {
@@ -293,7 +313,7 @@ public final class GuiEditCommand {
         try {
             return ButtonAction.valueOf(normalized);
         } catch (IllegalArgumentException error) {
-            throw new IllegalArgumentException("Bilinmeyen eylem: " + raw);
+            throw new IllegalArgumentException("Unknown action: " + raw);
         }
     }
 
@@ -320,8 +340,8 @@ public final class GuiEditCommand {
     }
 
     private static void showEditorInstructions(ServerPlayerEntity player) {
-        player.sendMessage(Text.literal("Düzenleyici: sol tık ana el eşyasını kopyalar; sağ/shift tık slotu temizler. "
-                + "Eylemi /guimaker action set ile ayarlayın.").formatted(Formatting.YELLOW), false);
+        player.sendMessage(Text.literal("Editor: left click copies the main-hand item; right/shift click clears the slot. "
+                + "Set the action with /guimaker action set.").formatted(Formatting.YELLOW), false);
     }
 
     private static int success(ServerCommandSource source, String message) {

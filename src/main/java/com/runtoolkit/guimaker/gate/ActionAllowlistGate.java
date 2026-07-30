@@ -20,12 +20,11 @@ import com.runtoolkit.guimaker.action.ButtonAction;
  * the same pattern.
  *
  * HOW THIS CLASS PREVENTS IT:
- * The Fabric mod has no concept of "run a function" anymore. Instead, every
- * button carries a value from the ButtonAction enum (a closed list). This
- * gate verifies that the value is genuinely a known, defined action, and
- * that its associated parameter (e.g. a target page ID) is in the expected
- * format and within reasonable bounds. An arbitrary string is never
- * interpreted as "an executable command."
+ * Every button carries a value from the ButtonAction enum (a closed list).
+ * Command actions contain only an ID from the server-owned command preset
+ * registry; raw command text is never accepted from a GUI or player command.
+ * This gate verifies that the action and its parameter are allowlisted before
+ * the dispatcher can perform any operation.
  */
 public final class ActionAllowlistGate {
 
@@ -52,6 +51,8 @@ public final class ActionAllowlistGate {
                 return isKnownSoundId(rawParam);
             case GIVE_ITEM:
                 return isKnownItemPresetId(rawParam);
+            case RUN_COMMAND:
+                return isKnownCommandPresetId(rawParam);
             default:
                 // If a new value is ever added to the enum and not handled
                 // here, DENY by default (deny-by-default).
@@ -82,6 +83,11 @@ public final class ActionAllowlistGate {
 
     // Item presets likewise come from a fixed registry.
     private static boolean isKnownItemPresetId(String rawParam) {
-        return com.runtoolkit.guimaker.gate.ItemPresetRegistry.isRegistered(rawParam);
+        return ItemPresetRegistry.isRegistered(rawParam);
+    }
+
+    // Command text never appears here. Only a server-owned preset ID is valid.
+    private static boolean isKnownCommandPresetId(String rawParam) {
+        return CommandPresetRegistry.isRegistered(rawParam);
     }
 }

@@ -34,27 +34,27 @@ public final class GuiDefinition {
 
     public int firstPageId() {
         if (pages.isEmpty()) {
-            throw new IllegalStateException("GUI içinde hiç sayfa yok.");
+            throw new IllegalStateException("The GUI has no pages.");
         }
         return pages.firstKey();
     }
 
     public void addPage(PageDefinition page) {
         if (pages.containsKey(page.id())) {
-            throw new IllegalArgumentException("Bu sayfa zaten mevcut: " + page.id());
+            throw new IllegalArgumentException("This page already exists: " + page.id());
         }
         if (pages.size() >= 64) {
-            throw new IllegalArgumentException("Bir GUI en fazla 64 sayfa içerebilir.");
+            throw new IllegalArgumentException("A GUI can contain at most 64 pages.");
         }
         pages.put(page.id(), page);
     }
 
     public void removePage(int pageId) {
         if (!pages.containsKey(pageId)) {
-            throw new IllegalArgumentException("Sayfa bulunamadı: " + pageId);
+            throw new IllegalArgumentException("Page not found: " + pageId);
         }
         if (pages.size() <= 1) {
-            throw new IllegalArgumentException("GUI'nin son sayfası silinemez.");
+            throw new IllegalArgumentException("The GUI's last page cannot be removed.");
         }
         pages.remove(pageId);
     }
@@ -62,7 +62,7 @@ public final class GuiDefinition {
     public static String normalizeAndValidateId(String raw) {
         String id = raw == null ? "" : raw.toLowerCase(java.util.Locale.ROOT).strip();
         if (!VALID_ID.matcher(id).matches()) {
-            throw new IllegalArgumentException("GUI kimliği 1-32 karakter olmalı; yalnızca a-z, 0-9, _ ve - kullanılabilir.");
+            throw new IllegalArgumentException("The GUI ID must be 1-32 characters and may contain only a-z, 0-9, _ and -.");
         }
         return id;
     }
