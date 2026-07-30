@@ -17,11 +17,12 @@ Place the mod JAR and the Fabric API JAR in the `mods/` directory.
 
 ## Quick start
 
-On first launch, the mod automatically creates an `example` GUI and these files:
+On first launch, the mod creates world-specific data inside the active save:
 
-- `config/guimaker/guis.json`
-- `config/guimaker/commands.json`
-- `config/guimaker/limits.json`
+- `<world>/data/guimaker/guis.json`
+- `<world>/data/guimaker/dialogs.json`
+- `<world>/data/guimaker/commands.json`
+- `<world>/data/guimaker/limits.json`
 
 ```mcfunction
 /guimaker menu
@@ -68,6 +69,11 @@ Management commands requiring OP level 2:
 
 ```text
 /guimaker menu
+/guimaker dialog list
+/guimaker dialog open <id>
+/guimaker dialog create <id> <notice|confirmation|multi_action|server_links|dialog_list|form|searchable_list|wizard> <title>
+/guimaker dialog edit title|body|type ...
+/guimaker dialog delete <id>
 /guimaker create <gui> <1-6 rows> <title>
 /guimaker delete <gui>
 /guimaker edit [gui] [page]
@@ -89,6 +95,155 @@ Management commands requiring OP level 2:
 `item set` stores every data component of the item in the player's main hand,
 including its custom name, lore and model data. The item is only a GUI display
 item and cannot be removed from the GUI.
+
+## World-specific storage and migration
+
+All GUI Maker data is scoped to the active Minecraft save. Different
+single-player saves or dedicated-server worlds no longer share GUIs, dialogs,
+command presets, or capacity limits.
+
+```text
+<world>/data/guimaker/guis.json
+<world>/data/guimaker/dialogs.json
+<world>/data/guimaker/commands.json
+<world>/data/guimaker/limits.json
+```
+
+Show the active directory with:
+
+```mcfunction
+/guimaker world-data
+```
+
+On the first start of a world, if a target file does not exist, the mod copies
+its legacy counterpart from `config/guimaker/`. Legacy files are never moved or
+deleted, so they remain a backup and a template for other worlds. The world
+receives `migration.json` describing the copied files and migration time.
+Existing world files always win and are never overwritten by migration.
+
+`/guimaker reload` reloads data only for the currently active save.
+
+## Managed dialog system
+
+`/guimaker dialog ...` provides persistent create, open, edit and delete
+operations backed by `<world>/data/guimaker/dialogs.json`.
+
+```mcfunction
+/guimaker dialog list
+/guimaker dialog create setup form Setup Form
+/guimaker dialog open setup
+/guimaker dialog edit title setup New Setup Title
+/guimaker dialog edit body setup Enter your settings
+/guimaker dialog edit type setup wizard
+/guimaker dialog delete setup
+```
+
+Inputs and gated actions can be managed from commands:
+
+```mcfunction
+/guimaker dialog input add setup username validated_text Username
+/guimaker dialog input add setup destination searchable_dropdown Destination
+/guimaker dialog input option setup destination spawn Server Spawn
+/guimaker dialog input add setup reward item_selector Reward Item
+/guimaker dialog input remove setup username
+/guimaker dialog action add setup show_help Submit
+/guimaker dialog action list setup
+/guimaker dialog action remove setup 0
+/guimaker dialog wizard step add setup Confirmation
+/guimaker dialog wizard step remove setup 1
+/guimaker dialog json setup
+```
+
+All creation and editing commands require OP level 2. Opening a known dialog is
+available to players, while every command-preset action still passes through the
+existing permission, cooldown and command allowlist gates.
+
+### Vanilla-compatible enhanced dialog layer
+
+The repository supports all five official Mojang dialog types:
+
+- `notice`
+- `confirmation`
+- `multi_action`
+- `server_links`
+- `dialog_list`
+
+It also provides three enhanced server-side templates that compile into those
+vanilla types before a packet is sent:
+
+- `form` — compiles to `minecraft:multi_action` with form controls.
+- `searchable_list` — uses a native text input and a server-side filtered result dialog.
+- `wizard` — compiles each step into nested native `minecraft:multi_action` dialogs.
+
+All four official input types are supported (`text`, `boolean`, `number_range`,
+`single_option`). Three enhanced input templates are also available:
+
+- `validated_text` — compiled to native text and validated by managed operations.
+- `searchable_dropdown` — compiled to native `single_option`.
+- `item_selector` — compiled to native text with item-ID semantics.
+
+No custom dialog codec, registry-sync extension, renderer Mixin or custom client
+screen is used. Every resulting screen is decoded and rendered by Mojang's
+standard 1.21.6+ dialog implementation, so the rewritten system remains usable
+with vanilla clients.
+
+## Placeholders
+
+Managed dialog JSON, dialog titles/bodies/buttons/options, GUI page titles and
+gated command presets support server-resolved placeholders.
+
+```text
+{player}              {player_name}       {display_name}
+{uuid}                {world}             {dimension}
+{x} {y} {z}           {block_x} {block_y} {block_z}
+{yaw} {pitch}         {health}            {max_health}
+{food}                {level}             {gamemode}
+{time}                {server_players}    {server_max_players}
+{server_motd}
+{key:<input_key>}
+```
+
+List them in game with:
+
+```mcfunction
+/guimaker dialog placeholders
+```
+
+Example:
+
+```mcfunction
+/guimaker dialog create welcome notice Welcome {player}
+/guimaker dialog edit body welcome You are in {world} at {block_x} {block_y} {block_z}
+/guimaker dialog open welcome
+```
+
+Replacement happens separately for each player immediately before the native
+dialog is compiled and sent. Unknown placeholders are left unchanged. Command
+preset replacements use command-safe player/display names.
+
+`{key:<input_key>}` reads a value submitted by a dialog input. Define it in a
+gated command preset and attach that preset to a dialog action:
+
+```json
+{
+  "id": "echo_name",
+  "command": "tellraw {player} {\"text\":\"Hello {key:name}\"}",
+  "run_as": "SERVER",
+  "server_permission_level": 2,
+  "required_player_permission_level": 0,
+  "cooldown_ms": 250,
+  "silent": true
+}
+```
+
+```mcfunction
+/guimaker dialog input add welcome name text Name
+/guimaker dialog action add welcome echo_name Submit
+```
+
+The action is automatically stored as `minecraft:dynamic/run_command`. Missing
+input keys are rejected when the action is added, and submitted values are
+parsed and command-escaped before being substituted into the gated preset.
 
 ## Dialog-based operator menu
 
@@ -169,7 +324,7 @@ a player or GUI definition is never executed.
 ## Gated command presets
 
 Command text exists only in the server-owned
-`config/guimaker/commands.json` allowlist. A GUI button stores a preset ID such
+`<world>/data/guimaker/commands.json` allowlist. A GUI button stores a preset ID such
 as `welcome_message`, never a command string. Edit this file from the server
 filesystem and run `/guimaker reload` afterward.
 
@@ -228,7 +383,7 @@ Security behavior:
 ## Configurable capacity limits
 
 GUI and command-preset capacities are controlled by
-`config/guimaker/limits.json`:
+`<world>/data/guimaker/limits.json`:
 
 ```json
 {
@@ -248,9 +403,10 @@ the server log.
 
 ## Persistence and limits
 
-- GUI file: `config/guimaker/guis.json`
-- Command allowlist: `config/guimaker/commands.json`
-- Capacity settings: `config/guimaker/limits.json`
+- GUI file: `<world>/data/guimaker/guis.json`
+- Managed dialogs: `<world>/data/guimaker/dialogs.json`
+- Command allowlist: `<world>/data/guimaker/commands.json`
+- Capacity settings: `<world>/data/guimaker/limits.json`
 - Every GUI change is saved immediately using an atomic file replacement.
 - Invalid files are backed up as `*.broken-<date>.json`.
 - GUI and command-preset limits are read from `limits.json`.
@@ -258,6 +414,70 @@ the server log.
 - The last GUI and the last page in a GUI cannot be removed accidentally.
 - General button clicks are rate-limited to one action per player every 150 ms.
 - Command actions also have their own per-preset cooldown.
+
+## Why the earlier 2.x versions were not published
+
+Version `2.3.0` is the first public and supported release in the 2.x line.
+Versions `2.0.0`, `2.1.0`, and `2.2.0` were internal development milestones,
+not missing public releases.
+
+- **2.0.0 — experimental custom dialog registries:** This build attempted to
+  add custom dialog/input codecs and client render dispatch through Mixin. It
+  produced registry-sync, client compatibility, and dialog rendering problems,
+  so it was rejected before publication.
+- **2.1.0 — native-dialog rewrite:** The dialog backend was rewritten to compile
+  all enhanced templates into Mojang's official 1.21.6+ dialog types. Although
+  substantially more stable, it was kept internal while all five vanilla types,
+  persistence, reload behavior, and enhanced form/search/wizard compilation were
+  being validated.
+- **2.2.0 — placeholder development build:** Per-player placeholders were added,
+  but dialog-input value substitution and complete action management were still
+  missing. Publishing it would have required another immediate breaking update.
+- **2.3.0 — first publishable 2.x build:** This version completes safe
+  `{key:<input_key>}` substitution, action listing/removal, gated input handling,
+  the native-dialog rewrite, and the placeholder system.
+
+The intermediate JARs were used only for development and testing. They are not
+recommended for servers, are not part of the supported upgrade path, and should
+not be mirrored as releases. Servers running any internal 2.0.0–2.2.0 build
+should replace it directly with `2.3.0` rather than attempting incremental
+upgrades.
+
+## Ready-to-install examples
+
+The repository includes a tested Minecraft 1.21.8 example datapack and complete
+sample configuration:
+
+```text
+examples/guimaker-example-datapack/
+examples/world-data/world/data/guimaker/commands.json
+examples/world-data/world/data/guimaker/dialogs.json
+examples/world-data/world/data/guimaker/guis.json
+examples/world-data/world/data/guimaker/limits.json
+```
+
+Generated ZIP files are written to `artifacts/`:
+
+```text
+guimaker-example-datapack-1.21.8.zip
+guimaker-example-world-data-2.4.0.zip
+guimaker-example-ready-to-install-2.4.0.zip
+```
+
+The ready-to-install bundle contains the mod JAR, sample world data under
+`world/data/guimaker/`, and the datapack under `world/datapacks/`. Fabric API is
+not bundled. Back up an existing `<world>/data/guimaker` directory before
+extracting the example world data.
+
+The datapack load hook schedules an idempotent post-startup bootstrap. It runs
+real `guimaker create`, `page add/rename`, `action set`, `dialog create/edit`,
+`dialog input add`, `dialog action add`, and `dialog wizard step add` commands.
+A world storage marker prevents duplicate creation on subsequent reloads.
+
+The sample was validated by starting and restarting a Minecraft 1.21.8 Fabric
+server: eight command presets, the configured GUI/dialogs, the datapack-created
+`datapack_demo` GUI and three managed dialogs all persisted without duplicate
+creation or command parsing errors.
 
 ## Build
 

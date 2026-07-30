@@ -3,19 +3,22 @@
   "id": "guimaker",
   "version": "${version}",
   "name": "GUI Maker",
-  "description": "Persistent GUI builder with native dialog menus, item click bindings, gated command presets and allowlisted actions.",
-  "authors": ["Legends11", "runtoolkit"],
+  "description": "World-scoped GUI and native dialog builder with safe placeholders, gated commands, forms and wizards.",
+  "authors": [
+    "Legends11",
+    "GUI Maker contributors"
+  ],
   "contact": {
-    "sources": "https://github.com/runtoolkit/guimaker-fabric"
+    "sources": "https://github.com/officialbarden/guimaker"
   },
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.runtoolkit.guimaker.GuiMakerMod"
+      "dev.guimaker.GuiMakerMod"
     ],
     "client": [
-      "com.runtoolkit.guimaker.GuiMakerClient"
+      "dev.guimaker.GuiMakerClient"
     ]
   },
   "depends": {
