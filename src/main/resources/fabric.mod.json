@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "guimaker",
+  "version": "1.0.0",
+  "name": "GUI Maker (Fabric Port)",
+  "description": "Gated, security-focused GUI builder. Closes the arbitrary function/command execution vulnerability present in the original datapack.",
+  "authors": ["Legends11", "runtoolkit"],
+  "contact": {
+    "sources": "https://github.com/runtoolkit/guiAPI"
+  },
+  "license": "MIT",
+  "icon": "assets/guimaker/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.runtoolkit.guimaker.GuiMakerMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.8",
+    "java": ">=21"
+  }
+}

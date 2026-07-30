@@ -1,1 +1,0 @@
-$dialog show @s {type:"minecraft:multi_action",title:"GUI Maker v2.0 Menu - Append a Page",body:{type:"minecraft:plain_message",contents:"Choose GUI ID"},inputs:[],can_close_with_escape:1b,pause:0b,columns:1,actions:$(ACTIONS_LIST)}

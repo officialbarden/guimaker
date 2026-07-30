@@ -1,0 +1,5 @@
+.gradlew/
+build/
+!src/main/
+*.jar
+*.zip

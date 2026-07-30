@@ -1,3 +1,0 @@
-$function gm:zprivate/gui_spawn/chest_minecart/main {GUI_ID:$(GUI_ID),PAGE:$(PAGE)}
-$tellraw @s[gamemode=creative] ["",{"text":"| ","click_event":{"action":"suggest_command","command":"/function gm:zprivate/gui_spawn/chest_minecart/main {GUI_ID:$(GUI_ID),PAGE:$(PAGE)}"}},{"text":"Click here to Copy Spawn Command.","italic":true,"color":"gray","click_event":{"action":"suggest_command","command":"/function gm:zprivate/gui_spawn/chest_minecart/main {GUI_ID:$(GUI_ID),PAGE:$(PAGE)}"}}]
-tellraw @s[gamemode=creative] [{"text":"The above message is only visible to Gamemode Creative players!", "color":"gray", italic:true}]
