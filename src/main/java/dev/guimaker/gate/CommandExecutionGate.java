@@ -15,6 +15,7 @@ public final class CommandExecutionGate {
         ALLOWED,
         PRESET_NOT_FOUND,
         INSUFFICIENT_PERMISSION,
+        SECURITY_ACK_REQUIRED,
         COOLDOWN
     }
 
@@ -25,6 +26,10 @@ public final class CommandExecutionGate {
         }
         if (!player.getCommandSource().hasPermissionLevel(preset.requiredPlayerPermissionLevel())) {
             return Decision.INSUFFICIENT_PERMISSION;
+        }
+        if (CommandPresetRegistry.requiresSecurityAcknowledgement(preset)
+                && !preset.securityAcknowledged()) {
+            return Decision.SECURITY_ACK_REQUIRED;
         }
 
         CooldownKey key = new CooldownKey(player.getUuid(), preset.id());

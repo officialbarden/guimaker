@@ -392,7 +392,8 @@ Example:
       "server_permission_level": 0,
       "required_player_permission_level": 0,
       "cooldown_ms": 1000,
-      "silent": false
+      "silent": false,
+      "security_acknowledged": false
     },
     {
       "id": "welcome_message",
@@ -401,7 +402,8 @@ Example:
       "server_permission_level": 2,
       "required_player_permission_level": 0,
       "cooldown_ms": 1000,
-      "silent": true
+      "silent": true,
+      "security_acknowledged": false
     }
   ]
 }
@@ -416,6 +418,10 @@ Preset fields:
 - `required_player_permission_level`: Minimum permission level 0-4 required to click the button.
 - `cooldown_ms`: Per-player, per-preset cooldown from 250 to 3,600,000 ms.
 - `silent`: Suppresses normal command feedback when enabled.
+- `security_acknowledged`: Explicit server-owner approval required for SERVER
+  presets using permission level 3-4 or sensitive commands such as `op`, `ban`,
+  `whitelist`, `reload`, or `stop`. Such presets remain loaded but are gated
+  from execution while this value is `false`; a SECURITY warning is logged.
 
 Supported placeholders:
 
@@ -512,8 +518,8 @@ Generated ZIP files are written to `artifacts/`:
 
 ```text
 guimaker-example-datapack-1.21.8.zip
-guimaker-example-world-data-2.5.0.zip
-guimaker-example-ready-to-install-2.5.0.zip
+guimaker-example-world-data-2.5.1.zip
+guimaker-example-ready-to-install-2.5.1.zip
 ```
 
 The ready-to-install bundle contains the mod JAR, sample world data under

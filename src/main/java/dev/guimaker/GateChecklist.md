@@ -9,7 +9,7 @@
 | 5 | Item preset allowlist | `ItemPresetRegistry` | Free-form NBT and item modifiers are never executed |
 | 6 | Command preset allowlist | `CommandPresetRegistry` | GUI data stores preset IDs, never raw commands |
 | 7 | Command permission/cooldown | `CommandExecutionGate` | Per-preset permission and cooldown checks |
-| 8 | Controlled command dispatcher | `GatedCommandExecutor` | PLAYER mode never elevates; SERVER mode uses an explicit level; input values are escaped |
+| 8 | Controlled command dispatcher | `GatedCommandExecutor` | PLAYER mode never elevates; input values are context-escaped; high-risk SERVER presets require acknowledgement |
 | 9 | Configurable capacity | `LimitsConfig` | Validated GUI and command-preset limits from world `limits.json` |
 | 10 | World data isolation | `WorldDataPaths` | Every save has independent GUI, dialog, command and limit files |
 | 11 | Non-destructive migration | `WorldDataPaths` | Legacy global files are copied only when world files are missing |

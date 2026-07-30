@@ -213,6 +213,7 @@ public final class GuiEditCommand {
                     + " [as=" + preset.runAs()
                     + ", required_permission=" + preset.requiredPlayerPermissionLevel()
                     + ", server_level=" + preset.serverPermissionLevel()
+                    + ", security_ack=" + preset.securityAcknowledged()
                     + ", cooldown=" + preset.cooldownMs() + "ms]")
                     .formatted(Formatting.YELLOW));
             source.sendMessage(Text.literal("  /" + preset.command()).formatted(Formatting.GRAY));

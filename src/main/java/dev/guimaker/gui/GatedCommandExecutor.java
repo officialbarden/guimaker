@@ -37,6 +37,11 @@ public final class GatedCommandExecutor {
                         .formatted(Formatting.RED), false);
                 return false;
             }
+            case SECURITY_ACK_REQUIRED -> {
+                player.sendMessage(Text.literal("GUI Maker: This high-risk command preset requires explicit server-owner acknowledgement.")
+                        .formatted(Formatting.RED), false);
+                return false;
+            }
             case COOLDOWN -> {
                 player.sendMessage(Text.literal("GUI Maker: This command preset is cooling down.")
                         .formatted(Formatting.YELLOW), true);

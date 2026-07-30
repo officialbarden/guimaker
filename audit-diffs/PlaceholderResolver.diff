@@ -1,0 +1,132 @@
+--- audit-before/src/main/java/dev/guimaker/util/PlaceholderResolver.java	2026-07-30 14:20:43.115910717 +0000
++++ src/main/java/dev/guimaker/util/PlaceholderResolver.java	2026-07-30 14:30:44.436641192 +0000
+@@ -1,5 +1,6 @@
+ package dev.guimaker.util;
+ 
++import com.google.gson.Gson;
+ import com.google.gson.JsonArray;
+ import com.google.gson.JsonElement;
+ import com.google.gson.JsonObject;
+@@ -18,6 +19,7 @@
+ 
+ /** Resolves trusted, server-provided placeholders for dialogs and commands. */
+ public final class PlaceholderResolver {
++    private static final Gson GSON = new Gson();
+     private static final Pattern KEY_PLACEHOLDER = Pattern.compile("\\{key:([A-Za-z0-9_]{1,32})}");
+ 
+     private PlaceholderResolver() {}
+@@ -32,12 +34,38 @@
+ 
+     public static String resolveCommand(String input, ServerPlayerEntity player,
+                                         Map<String, String> keyValues) {
+-        String result = replace(input, values(player, true));
+-        for (Map.Entry<String, String> entry : keyValues.entrySet()) {
+-            String safeValue = StringArgumentType.escapeIfRequired(entry.getValue());
+-            result = result.replace("{key:" + entry.getKey() + "}", safeValue);
++        String result = input;
++        for (Map.Entry<String, String> entry : values(player, false).entrySet()) {
++            result = replaceCommandPlaceholder(result, entry.getKey(), entry.getValue());
++        }
++        return resolveKeyValues(result, keyValues);
++    }
++
++    /**
++     * Replaces dialog input placeholders according to their command context:
++     * JSON-string content is escaped without surrounding quotes, structured
++     * JSON/SNBT values use a complete Gson string literal, and ordinary
++     * Brigadier arguments use Brigadier quoting.
++     */
++    public static String resolveKeyValues(String input, Map<String, String> keyValues) {
++        if (input == null || keyValues.isEmpty() || input.indexOf("{key:") < 0) {
++            return input;
+         }
+-        return result;
++        Matcher matcher = KEY_PLACEHOLDER.matcher(input);
++        StringBuilder output = new StringBuilder(input.length());
++        int end = 0;
++        while (matcher.find()) {
++            output.append(input, end, matcher.start());
++            String key = matcher.group(1);
++            String value = keyValues.get(key);
++            if (value == null) {
++                output.append(matcher.group());
++            } else {
++                output.append(encodeForContext(value, contextAt(input, matcher.start())));
++            }
++            end = matcher.end();
++        }
++        return output.append(input, end, input.length()).toString();
+     }
+ 
+     public static Set<String> keyPlaceholders(String input) {
+@@ -120,6 +148,70 @@
+         return values;
+     }
+ 
++    private static String replaceCommandPlaceholder(String input, String placeholder, String value) {
++        int start = input.indexOf(placeholder);
++        while (start >= 0) {
++            String encoded = encodeForContext(value, contextAt(input, start));
++            input = input.substring(0, start) + encoded + input.substring(start + placeholder.length());
++            start = input.indexOf(placeholder, start + encoded.length());
++        }
++        return input;
++    }
++
++    private static String encodeForContext(String value, KeyContext context) {
++        String jsonLiteral = GSON.toJson(value == null ? "" : value);
++        return switch (context) {
++            case JSON_STRING -> jsonLiteral.substring(1, jsonLiteral.length() - 1);
++            case STRUCTURED_VALUE -> jsonLiteral;
++            case COMMAND_ARGUMENT -> StringArgumentType.escapeIfRequired(value == null ? "" : value);
++        };
++    }
++
++    private static KeyContext contextAt(String input, int limit) {
++        boolean quoted = false;
++        boolean escaped = false;
++        int structuredDepth = 0;
++        for (int index = 0; index < limit; index++) {
++            char character = input.charAt(index);
++            if (quoted) {
++                if (escaped) {
++                    escaped = false;
++                } else if (character == '\\') {
++                    escaped = true;
++                } else if (character == '"') {
++                    quoted = false;
++                }
++                continue;
++            }
++            if (character == '"') {
++                quoted = true;
++            } else if (character == '{' || character == '[') {
++                // Placeholder braces are not JSON/SNBT structure braces.
++                if (character == '{') {
++                    int close = input.indexOf('}', index + 1);
++                    if (close >= 0 && close < limit) {
++                        String candidate = input.substring(index + 1, close);
++                        if (candidate.matches("[A-Za-z_][A-Za-z0-9_:<>.-]*")) {
++                            index = close;
++                            continue;
++                        }
++                    }
++                }
++                structuredDepth++;
++            } else if ((character == '}' || character == ']') && structuredDepth > 0) {
++                structuredDepth--;
++            }
++        }
++        if (quoted) return KeyContext.JSON_STRING;
++        return structuredDepth > 0 ? KeyContext.STRUCTURED_VALUE : KeyContext.COMMAND_ARGUMENT;
++    }
++
++    private enum KeyContext {
++        JSON_STRING,
++        STRUCTURED_VALUE,
++        COMMAND_ARGUMENT
++    }
++
+     private static String replace(String input, Map<String, String> values) {
+         if (input == null || input.indexOf('{') < 0) {
+             return input;

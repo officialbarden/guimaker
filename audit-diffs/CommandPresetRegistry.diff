@@ -1,0 +1,125 @@
+--- audit-before/src/main/java/dev/guimaker/gate/CommandPresetRegistry.java	2026-07-30 14:20:43.119910717 +0000
++++ src/main/java/dev/guimaker/gate/CommandPresetRegistry.java	2026-07-30 14:33:15.680641192 +0000
+@@ -22,7 +22,10 @@
+ import java.util.Collection;
+ import java.util.Collections;
+ import java.util.Locale;
++import java.util.Optional;
++import java.util.Set;
+ import java.util.TreeMap;
++import java.util.regex.Matcher;
+ import java.util.regex.Pattern;
+ 
+ /**
+@@ -34,6 +37,10 @@
+     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+     private static final Pattern VALID_ID = Pattern.compile("[a-z0-9_.-]{1,64}");
+     private static final Pattern CONTROL_CHARACTER = Pattern.compile("[\\p{Cntrl}]");
++    private static final Set<String> SENSITIVE_COMMANDS = Set.of(
++            "op", "deop", "stop", "ban", "ban-ip", "pardon", "pardon-ip",
++            "whitelist", "kick", "reload", "save-off", "save-all");
++    private static final Pattern COMMAND_AFTER_RUN = Pattern.compile("(?:^|\\brun\\s+)([a-z0-9_:-]+)\\b");
+     private static final int MAX_COMMAND_LENGTH = 512;
+     private static final long MIN_COOLDOWN_MS = 250L;
+     private static final long MAX_COOLDOWN_MS = 3_600_000L;
+@@ -53,7 +60,8 @@
+             int serverPermissionLevel,
+             int requiredPlayerPermissionLevel,
+             long cooldownMs,
+-            boolean silent
++            boolean silent,
++            boolean securityAcknowledged
+     ) {}
+ 
+     public static synchronized void load() {
+@@ -76,6 +84,7 @@
+             for (JsonElement element : commands) {
+                 try {
+                     CommandPreset preset = decode(element.getAsJsonObject());
++                    auditSecurity(preset);
+                     if (PRESETS.size() >= LimitsConfig.maxCommandPresets()) {
+                         LOGGER.warn("Command preset limit ({}) reached; remaining entries were skipped.",
+                                 LimitsConfig.maxCommandPresets());
+@@ -126,6 +135,39 @@
+         return Collections.unmodifiableList(PRESETS.values().stream().toList());
+     }
+ 
++    public static boolean requiresSecurityAcknowledgement(CommandPreset preset) {
++        return preset != null
++                && preset.runAs() == ExecutionMode.SERVER
++                && (preset.serverPermissionLevel() >= 3 || sensitiveCommand(preset.command()).isPresent());
++    }
++
++    private static void auditSecurity(CommandPreset preset) {
++        if (preset.runAs() != ExecutionMode.SERVER) return;
++        Optional<String> sensitive = sensitiveCommand(preset.command());
++        if (preset.serverPermissionLevel() >= 3) {
++            LOGGER.warn("SECURITY: preset '{}' requests SERVER permission level {} (acknowledged={}).",
++                    preset.id(), preset.serverPermissionLevel(), preset.securityAcknowledged());
++        }
++        sensitive.ifPresent(command -> LOGGER.warn(
++                "SECURITY: preset '{}' contains sensitive command '{}' (acknowledged={}): /{}",
++                preset.id(), command, preset.securityAcknowledged(), preset.command()));
++        if (requiresSecurityAcknowledgement(preset) && !preset.securityAcknowledged()) {
++            LOGGER.warn("SECURITY GATE: preset '{}' remains loaded but execution is blocked until "
++                    + "security_acknowledged is set to true in commands.json.", preset.id());
++        }
++    }
++
++    private static Optional<String> sensitiveCommand(String command) {
++        Matcher matcher = COMMAND_AFTER_RUN.matcher(command.toLowerCase(Locale.ROOT));
++        while (matcher.find()) {
++            String root = matcher.group(1);
++            int namespaceSeparator = root.indexOf(':');
++            if (namespaceSeparator >= 0) root = root.substring(namespaceSeparator + 1);
++            if (SENSITIVE_COMMANDS.contains(root)) return Optional.of(root);
++        }
++        return Optional.empty();
++    }
++
+     private static Path configFile() {
+         return WorldDataPaths.file("commands.json");
+     }
+@@ -139,6 +181,7 @@
+         int requiredPermission = optionalInt(object, "required_player_permission_level", 0);
+         long cooldownMs = optionalLong(object, "cooldown_ms", 1000L);
+         boolean silent = optionalBoolean(object, "silent", false);
++        boolean securityAcknowledged = optionalBoolean(object, "security_acknowledged", false);
+ 
+         validatePermissionLevel(permissionLevel, "server_permission_level");
+         validatePermissionLevel(requiredPermission, "required_player_permission_level");
+@@ -147,7 +190,7 @@
+                     + MIN_COOLDOWN_MS + " and " + MAX_COOLDOWN_MS);
+         }
+         return new CommandPreset(id, command, runAs, permissionLevel,
+-                requiredPermission, cooldownMs, silent);
++                requiredPermission, cooldownMs, silent, securityAcknowledged);
+     }
+ 
+     private static synchronized void save() {
+@@ -165,6 +208,7 @@
+                 object.addProperty("required_player_permission_level", preset.requiredPlayerPermissionLevel());
+                 object.addProperty("cooldown_ms", preset.cooldownMs());
+                 object.addProperty("silent", preset.silent());
++                object.addProperty("security_acknowledged", preset.securityAcknowledged());
+                 commands.add(object);
+             }
+             root.add("commands", commands);
+@@ -192,6 +236,7 @@
+                 0,
+                 0,
+                 1000L,
++                false,
+                 false
+         ));
+         putDefault(new CommandPreset(
+@@ -201,7 +246,8 @@
+                 2,
+                 0,
+                 1000L,
+-                true
++                true,
++                false
+         ));
+     }
+ 

@@ -9,8 +9,10 @@ import net.minecraft.util.WorldSavePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -65,8 +67,7 @@ public final class WorldDataPaths {
         for (String fileName : DATA_FILES) {
             Path source = legacyDirectory.resolve(fileName);
             Path target = worldDirectory.resolve(fileName);
-            if (!Files.exists(target) && Files.isRegularFile(source)) {
-                Files.copy(source, target, StandardCopyOption.COPY_ATTRIBUTES);
+            if (copyLegacyFileIfAbsent(source, target)) {
                 copied.add(fileName);
                 LOGGER.info("Copied legacy global GUI Maker data into this world: {} -> {}", source, target);
             }
@@ -83,6 +84,19 @@ public final class WorldDataPaths {
                     worldDirectory.resolve("migration.json"), StandardCharsets.UTF_8)) {
                 new GsonBuilder().setPrettyPrinting().create().toJson(marker, writer);
             }
+        }
+    }
+
+    static boolean copyLegacyFileIfAbsent(Path source, Path target) throws IOException {
+        if (!Files.isRegularFile(source)) return false;
+        try {
+            // Files.copy without REPLACE_EXISTING has CREATE_NEW semantics.
+            // Exactly one concurrent caller can create the target.
+            Files.copy(source, target, StandardCopyOption.COPY_ATTRIBUTES);
+            return true;
+        } catch (FileAlreadyExistsException ignored) {
+            LOGGER.debug("World GUI Maker data already exists; migration skipped: {}", target);
+            return false;
         }
     }
 }
