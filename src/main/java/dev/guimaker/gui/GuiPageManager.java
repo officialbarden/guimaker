@@ -28,7 +28,7 @@ public final class GuiPageManager {
             return false;
         }
 
-        Inventory inventory = page.createInventory();
+        Inventory inventory = page.createRuntimeInventory(player);
         player.openHandledScreen(new NamedScreenHandlerFactory() {
             @Override
             public Text getDisplayName() {

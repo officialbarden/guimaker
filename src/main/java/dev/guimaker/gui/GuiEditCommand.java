@@ -67,6 +67,7 @@ public final class GuiEditCommand {
                 .then(literal("list").executes(context -> list(context.getSource())))
                 .then(GuiMenuCommand.build())
                 .then(ManagedDialogCommand.build())
+                .then(WidgetCommand.build())
                 .then(literal("commands").requires(PermissionGate::canEditGui)
                         .executes(context -> listCommandPresets(context.getSource())))
                 .then(literal("limits").requires(PermissionGate::canEditGui)
@@ -162,6 +163,8 @@ public final class GuiEditCommand {
             source.sendMessage(Text.literal("/guimaker page add|rename|remove ... | item set|clear ... | action set|clear ...")
                     .formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("/guimaker item bind <gui> <page> [right|left|both] | unbind | binding")
+                    .formatted(Formatting.AQUA));
+            source.sendMessage(Text.literal("/guimaker widget set|clear|reset|list ...")
                     .formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("/guimaker commands — list gated command presets")
                     .formatted(Formatting.AQUA));

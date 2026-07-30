@@ -13,6 +13,8 @@ import dev.guimaker.config.WorldDataPaths;
 import dev.guimaker.dialog.DialogRepository;
 import dev.guimaker.gate.ActionAllowlistGate;
 import dev.guimaker.gate.CommandPresetRegistry;
+import dev.guimaker.widget.WidgetDefinition;
+import dev.guimaker.widget.WidgetStateRepository;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -39,7 +41,7 @@ import java.util.TreeMap;
 
 /**
  * Server-side persistent GUI storage. Mutations are immediately written to
- * config/guimaker/guis.json using an atomic replace where supported.
+ * <world>/data/guimaker/guis.json using an atomic replace where supported.
  */
 public final class GuiRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger("guimaker");
@@ -61,6 +63,7 @@ public final class GuiRepository {
         LimitsConfig.load();
         CommandPresetRegistry.load();
         DialogRepository.load(minecraftServer);
+        WidgetStateRepository.load(minecraftServer);
         GUIS.clear();
 
         if (!Files.exists(dataFile())) {
@@ -110,6 +113,7 @@ public final class GuiRepository {
         }
         GUIS.clear();
         DialogRepository.close();
+        WidgetStateRepository.close();
         CommandPresetRegistry.clear();
         WorldDataPaths.clear();
         server = null;
@@ -228,6 +232,17 @@ public final class GuiRepository {
         save();
     }
 
+    public static synchronized void setWidget(String guiId, int pageId, int slot,
+                                              WidgetDefinition widget) {
+        requirePage(guiId, pageId).setWidget(slot, widget);
+        save();
+    }
+
+    public static synchronized void clearWidget(String guiId, int pageId, int slot) {
+        requirePage(guiId, pageId).clearWidget(slot);
+        save();
+    }
+
     public static synchronized void save() {
         if (server == null) {
             return;
@@ -278,6 +293,9 @@ public final class GuiRepository {
                 if (!button.parameter().isEmpty()) {
                     buttonObject.addProperty("parameter", button.parameter());
                 }
+                if (button.widget() != null) {
+                    buttonObject.add("widget", button.widget().toJson());
+                }
                 buttons.add(buttonObject);
             }
             pageObject.add("buttons", buttons);
@@ -314,7 +332,9 @@ public final class GuiRepository {
                         action = ButtonAction.NO_OP;
                         parameter = "";
                     }
-                    page.putButton(slot, new ButtonDefinition(stack, action, parameter));
+                    WidgetDefinition widget = buttonObject.has("widget")
+                            ? WidgetDefinition.fromJson(buttonObject.getAsJsonObject("widget")) : null;
+                    page.putButton(slot, new ButtonDefinition(stack, action, parameter, widget));
                 }
             }
             gui.addPage(page);

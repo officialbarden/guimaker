@@ -18,11 +18,14 @@
 | 14 | Native dialog compiler | `DialogRepository` | Enhanced templates compile to Mojang codecs before transmission |
 | 15 | Vanilla client compatibility | `DialogRepository` | No custom registry sync, renderer or dialog Mixin is required |
 | 16 | Trusted placeholder resolution | `PlaceholderResolver` | Only server-derived values are substituted; command names are escaped |
-| 17 | Item binding validation | `ItemGuiBinding`, `ItemGuiInteractionHandler` | Server validates held-item custom data and target page on every click |
-| 18 | Item-open rate limit | `ItemOpenRateLimitGate` | Duplicate callbacks and packet spam cannot repeatedly open screens |
-| 19 | Safe persistence | `GuiRepository` | Validated JSON, atomic writes and invalid-file backups |
-| 20 | Read-only runtime GUI | `GuiMakerScreenHandler` | Display items cannot be taken or duplicated |
-| 21 | Permission-gated visual editor | `GuiEditorScreenHandler` | Items are copied without consumption; inventories are not moved |
+| 17 | Widget configuration validation | `WidgetDefinition`, `WidgetCommand` | Types, keys, options, ranges and scopes are validated before saving |
+| 18 | Scoped widget persistence | `WidgetStateRepository` | Player/world states use throttled atomic writes in the active save |
+| 19 | Item-holder exclusivity | `WidgetStateRepository`, `GuiMakerScreenHandler` | Holder locks prevent concurrent world-state item duplication |
+| 20 | Item binding validation | `ItemGuiBinding`, `ItemGuiInteractionHandler` | Server validates held-item custom data and target page on every click |
+| 21 | Item-open rate limit | `ItemOpenRateLimitGate` | Duplicate callbacks and packet spam cannot repeatedly open screens |
+| 22 | Safe persistence | `GuiRepository` | Validated JSON, atomic writes and invalid-file backups |
+| 23 | Read-only runtime GUI | `GuiMakerScreenHandler` | Non-holder display items cannot be taken or duplicated |
+| 24 | Permission-gated visual editor | `GuiEditorScreenHandler` | Items are copied without consumption; inventories are not moved |
 
 Actions are restricted to the `ButtonAction` enum. `OPEN_PAGE` can only open a
 registered page in the same GUI; `PLAY_SOUND` and `GIVE_ITEM` use fixed

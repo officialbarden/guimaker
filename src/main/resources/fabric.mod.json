@@ -3,7 +3,7 @@
   "id": "guimaker",
   "version": "${version}",
   "name": "GUI Maker",
-  "description": "World-scoped GUI and native dialog builder with safe placeholders, gated commands, forms and wizards.",
+  "description": "World-scoped GUI builder with persistent widgets, native dialogs, placeholders and gated commands.",
   "authors": [
     "Legends11",
     "GUI Maker contributors"

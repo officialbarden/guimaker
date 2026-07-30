@@ -8,6 +8,7 @@ import dev.guimaker.data.GuiDefinition;
 import dev.guimaker.data.GuiRepository;
 import dev.guimaker.data.PageDefinition;
 import dev.guimaker.item.ItemGuiBinding;
+import dev.guimaker.widget.WidgetDefinition;
 import net.minecraft.dialog.AfterAction;
 import net.minecraft.dialog.DialogActionButtonData;
 import net.minecraft.dialog.DialogButtonData;
@@ -166,6 +167,8 @@ public final class DialogMenuManager {
                         "Open the visual item editor."),
                 runButton("Edit Button Actions", "guimaker menu buttons " + prefix + " 0",
                         "Choose a configured slot and edit its safe action."),
+                runButton("Configure Widgets", "guimaker menu widgets " + prefix,
+                        "Create toggles, cycles, counters and item holders."),
                 runButton("Open Page", "guimaker open " + prefix,
                         "Preview the runtime page."),
                 runButton("Back", "guimaker menu pages edit " + gui.id() + " 0", null)
@@ -308,6 +311,72 @@ public final class DialogMenuManager {
         open(player, dialog("GUI Maker v2.0 - Bind Held Item",
                 "GUI: " + gui.id() + " | Page: " + page.id()
                         + ". Choose which click opens this page.", inputs, actions, 1));
+    }
+
+    public static void showWidgetList(ServerPlayerEntity player, String guiId, int pageId) {
+        GuiDefinition gui = GuiRepository.requireGui(guiId);
+        PageDefinition page = GuiRepository.requirePage(gui.id(), pageId);
+        List<DialogActionButtonData> actions = new ArrayList<>();
+        page.buttons().forEach((slot, button) -> {
+            WidgetDefinition widget = button.widget();
+            if (widget != null) {
+                actions.add(runButton("Slot " + slot + " - " + widget.type(),
+                        "guimaker menu widget-detail " + gui.id() + " " + page.id() + " " + slot,
+                        widget.scope() + " | key=" + widget.key()));
+            }
+        });
+        actions.add(runButton("Create / Replace Widget",
+                "guimaker menu widget-form " + gui.id() + " " + page.id(),
+                "Configure a widget with slot, type, scope, key and config."));
+        actions.add(runButton("Back", "guimaker menu page-options " + gui.id() + " " + page.id(), null));
+        open(player, dialog("GUI Maker - Widgets",
+                actions.size() <= 2 ? "No widgets are configured on this page." : "Select a widget to reset or remove it.",
+                List.of(), actions, 1));
+    }
+
+    public static void showWidgetForm(ServerPlayerEntity player, String guiId, int pageId) {
+        GuiDefinition gui = GuiRepository.requireGui(guiId);
+        PageDefinition page = GuiRepository.requirePage(gui.id(), pageId);
+        List<SingleOptionInputControl.Entry> types = List.of(
+                new SingleOptionInputControl.Entry("toggle", Optional.of(Text.literal("Toggle")), true),
+                new SingleOptionInputControl.Entry("cycle", Optional.of(Text.literal("Cycle")), false),
+                new SingleOptionInputControl.Entry("counter", Optional.of(Text.literal("Counter")), false),
+                new SingleOptionInputControl.Entry("item_holder", Optional.of(Text.literal("Item Holder")), false));
+        List<SingleOptionInputControl.Entry> scopes = List.of(
+                new SingleOptionInputControl.Entry("player", Optional.of(Text.literal("Per Player")), true),
+                new SingleOptionInputControl.Entry("world", Optional.of(Text.literal("Shared World")), false));
+        List<DialogInput> inputs = List.of(
+                textInput("slot", "Slot (0-" + (page.size() - 1) + ")", "0", 2),
+                new DialogInput("type", new SingleOptionInputControl(300, types, Text.literal("Widget Type"), true)),
+                new DialogInput("scope", new SingleOptionInputControl(300, scopes, Text.literal("State Scope"), true)),
+                textInput("key", "State Key", "example_widget", 64),
+                textInput("config", "Config", "false", 256));
+        List<DialogActionButtonData> actions = List.of(
+                dynamicButton("Save Widget",
+                        "guimaker widget set " + gui.id() + " " + page.id()
+                                + " $(slot) $(type) $(scope) $(key) $(config)",
+                        "Toggle: true/false | Cycle: a,b,c | Counter: min,max,step,default | Holder: ignored"),
+                runButton("Back", "guimaker menu widgets " + gui.id() + " " + page.id(), null));
+        open(player, dialog("GUI Maker - Configure Widget",
+                "Config formats: toggle=true; cycle=red,green,blue; counter=0,10,1,0; item_holder=ignored.",
+                inputs, actions, 1));
+    }
+
+    public static void showWidgetDetail(ServerPlayerEntity player, String guiId, int pageId, int slot) {
+        GuiDefinition gui = GuiRepository.requireGui(guiId);
+        PageDefinition page = GuiRepository.requirePage(gui.id(), pageId);
+        ButtonDefinition button = page.button(slot);
+        if (button == null || button.widget() == null) throw new IllegalArgumentException("No widget is configured in that slot.");
+        WidgetDefinition widget = button.widget();
+        List<DialogActionButtonData> actions = List.of(
+                runButton("Reset State", "guimaker widget reset " + gui.id() + " " + page.id() + " " + slot,
+                        "Reset this widget to its configured default."),
+                runButton("Remove Widget", "guimaker widget clear " + gui.id() + " " + page.id() + " " + slot,
+                        "Keep the slot item/action but remove widget behavior."),
+                runButton("Back", "guimaker menu widgets " + gui.id() + " " + page.id(), null));
+        open(player, dialog("Widget - Slot " + slot,
+                "Type: " + widget.type() + " | Scope: " + widget.scope() + " | Key: " + widget.key(),
+                List.of(), actions, 1));
     }
 
     public static void showDeleteMenu(ServerPlayerEntity player) {

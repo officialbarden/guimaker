@@ -65,6 +65,26 @@ public final class GuiMenuCommand {
                                         .executes(context -> execute(context, player ->
                                                 DialogMenuManager.showItemBindingForm(player,
                                                         string(context, "gui"), integer(context, "page")))))))
+                .then(literal("widgets")
+                        .then(argument("gui", StringArgumentType.word()).suggests(GuiMenuCommand::suggestGuiIds)
+                                .then(argument("page", IntegerArgumentType.integer(0, 9999))
+                                        .executes(context -> execute(context, player ->
+                                                DialogMenuManager.showWidgetList(player,
+                                                        string(context, "gui"), integer(context, "page")))))))
+                .then(literal("widget-form")
+                        .then(argument("gui", StringArgumentType.word()).suggests(GuiMenuCommand::suggestGuiIds)
+                                .then(argument("page", IntegerArgumentType.integer(0, 9999))
+                                        .executes(context -> execute(context, player ->
+                                                DialogMenuManager.showWidgetForm(player,
+                                                        string(context, "gui"), integer(context, "page")))))))
+                .then(literal("widget-detail")
+                        .then(argument("gui", StringArgumentType.word()).suggests(GuiMenuCommand::suggestGuiIds)
+                                .then(argument("page", IntegerArgumentType.integer(0, 9999))
+                                        .then(argument("slot", IntegerArgumentType.integer(0, 53))
+                                                .executes(context -> execute(context, player ->
+                                                        DialogMenuManager.showWidgetDetail(player,
+                                                                string(context, "gui"), integer(context, "page"),
+                                                                integer(context, "slot"))))))))
                 .then(literal("page-options")
                         .then(argument("gui", StringArgumentType.word()).suggests(GuiMenuCommand::suggestGuiIds)
                                 .then(argument("page", IntegerArgumentType.integer(0, 9999))

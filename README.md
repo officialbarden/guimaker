@@ -23,6 +23,7 @@ On first launch, the mod creates world-specific data inside the active save:
 - `<world>/data/guimaker/dialogs.json`
 - `<world>/data/guimaker/commands.json`
 - `<world>/data/guimaker/limits.json`
+- `<world>/data/guimaker/widget-state.json`
 
 ```mcfunction
 /guimaker menu
@@ -87,6 +88,10 @@ Management commands requiring OP level 2:
 /guimaker item binding
 /guimaker action set <gui> <page> <slot> <action> [parameter]
 /guimaker action clear <gui> <page> <slot>
+/guimaker widget set <gui> <page> <slot> <type> <scope> <key> [config]
+/guimaker widget clear <gui> <page> <slot>
+/guimaker widget reset <gui> <page> <slot>
+/guimaker widget list <gui> <page>
 /guimaker commands
 /guimaker limits
 /guimaker reload
@@ -107,6 +112,7 @@ command presets, or capacity limits.
 <world>/data/guimaker/dialogs.json
 <world>/data/guimaker/commands.json
 <world>/data/guimaker/limits.json
+<world>/data/guimaker/widget-state.json
 ```
 
 Show the active directory with:
@@ -268,6 +274,51 @@ permission and allowlist gates as the text commands.
 The dialogs are built server-side with Minecraft's native dialog API. No custom
 client screen or resource pack is required.
 
+## Stateful chest-GUI widgets
+
+Normal chest GUIs support four stateful widget types:
+
+- **Toggle** — switches between ON and OFF.
+- **Cycle** — advances through a configured list of string options.
+- **Counter** — left-click increments and right-click decrements within bounds.
+- **Item Holder** — stores a real item stack that can be inserted or removed.
+
+Every widget chooses a state scope:
+
+- `player` — each player has an independent value.
+- `world` — all players in the active save share the value.
+
+Widget state is persisted in `<world>/data/guimaker/widget-state.json` and is
+flushed with throttled atomic writes. It survives restarts. Configure widgets
+from `/guimaker menu` → Edit GUI → page → **Configure Widgets**, or use commands:
+
+```mcfunction
+/guimaker widget set market 0 18 toggle player newsletter false
+/guimaker widget set market 0 19 cycle player theme red,green,blue
+/guimaker widget set market 0 20 counter world visitor_count 0,100,1,0
+/guimaker widget set market 0 21 item_holder player personal_storage
+
+/guimaker widget list market 0
+/guimaker widget reset market 0 18
+/guimaker widget clear market 0 18
+```
+
+Config formats:
+
+```text
+toggle:      true or false
+cycle:       option_a,option_b,option_c
+counter:     minimum,maximum,step,default
+item_holder: config is ignored
+```
+
+A widget slot may also keep an allowlisted button action; toggle/cycle/counter
+state is updated first, then the optional action runs through the normal gates.
+Item holders never execute slot actions. World-scoped item holders use an
+exclusive per-slot state lock so two open screens cannot duplicate the same
+stored stack. Player inventory interaction is enabled only while an item-holder
+screen owns a lock, and shift-click remains disabled.
+
 ## Item click GUI bindings
 
 An operator can bind the item in their main hand to a GUI page:
@@ -407,6 +458,7 @@ the server log.
 - Managed dialogs: `<world>/data/guimaker/dialogs.json`
 - Command allowlist: `<world>/data/guimaker/commands.json`
 - Capacity settings: `<world>/data/guimaker/limits.json`
+- Widget state: `<world>/data/guimaker/widget-state.json`
 - Every GUI change is saved immediately using an atomic file replacement.
 - Invalid files are backed up as `*.broken-<date>.json`.
 - GUI and command-preset limits are read from `limits.json`.
@@ -460,8 +512,8 @@ Generated ZIP files are written to `artifacts/`:
 
 ```text
 guimaker-example-datapack-1.21.8.zip
-guimaker-example-world-data-2.4.0.zip
-guimaker-example-ready-to-install-2.4.0.zip
+guimaker-example-world-data-2.5.0.zip
+guimaker-example-ready-to-install-2.5.0.zip
 ```
 
 The ready-to-install bundle contains the mod JAR, sample world data under

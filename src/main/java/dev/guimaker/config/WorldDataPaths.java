@@ -21,7 +21,7 @@ import java.util.List;
 public final class WorldDataPaths {
     private static final Logger LOGGER = LoggerFactory.getLogger("guimaker");
     private static final List<String> DATA_FILES = List.of(
-            "guis.json", "dialogs.json", "commands.json", "limits.json");
+            "guis.json", "dialogs.json", "commands.json", "limits.json", "widget-state.json");
     private static Path worldDirectory;
 
     private WorldDataPaths() {}

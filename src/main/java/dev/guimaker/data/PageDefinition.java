@@ -1,8 +1,11 @@
 package dev.guimaker.data;
 
 import dev.guimaker.action.ButtonAction;
+import dev.guimaker.widget.WidgetDefinition;
+import dev.guimaker.widget.WidgetRenderer;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.Collections;
 import java.util.Map;
@@ -77,6 +80,22 @@ public final class PageDefinition {
         cleanup(slot, button);
     }
 
+    public void setWidget(int slot, WidgetDefinition widget) {
+        validateSlot(slot);
+        ButtonDefinition button = buttons.computeIfAbsent(slot, ignored -> ButtonDefinition.empty());
+        button.setWidget(widget);
+        cleanup(slot, button);
+    }
+
+    public void clearWidget(int slot) {
+        validateSlot(slot);
+        ButtonDefinition button = buttons.get(slot);
+        if (button != null) {
+            button.setWidget(null);
+            cleanup(slot, button);
+        }
+    }
+
     public void clearButton(int slot) {
         validateSlot(slot);
         buttons.remove(slot);
@@ -86,6 +105,14 @@ public final class PageDefinition {
         SimpleInventory inventory = new SimpleInventory(size());
         for (Map.Entry<Integer, ButtonDefinition> entry : buttons.entrySet()) {
             inventory.setStack(entry.getKey(), entry.getValue().displayStack());
+        }
+        return inventory;
+    }
+
+    public SimpleInventory createRuntimeInventory(ServerPlayerEntity player) {
+        SimpleInventory inventory = new SimpleInventory(size());
+        for (Map.Entry<Integer, ButtonDefinition> entry : buttons.entrySet()) {
+            inventory.setStack(entry.getKey(), WidgetRenderer.render(entry.getValue(), player));
         }
         return inventory;
     }

@@ -17,6 +17,11 @@ public final class GuiButtonExecutor {
         if (!RateLimitGate.tryAcquire(player.getUuid())) {
             return false;
         }
+        return executeAfterRateLimit(player, guiId, action, rawParameter);
+    }
+
+    public static boolean executeAfterRateLimit(ServerPlayerEntity player, String guiId,
+                                                ButtonAction action, String rawParameter) {
         if (!ActionAllowlistGate.isAllowed(action, rawParameter)) {
             player.sendMessage(Text.literal("GUI Maker: Invalid or disallowed action.")
                     .formatted(Formatting.RED), false);
