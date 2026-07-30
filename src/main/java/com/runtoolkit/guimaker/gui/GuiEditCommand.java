@@ -15,6 +15,7 @@ import com.runtoolkit.guimaker.gate.CommandPresetRegistry;
 import com.runtoolkit.guimaker.gate.ItemPresetRegistry;
 import com.runtoolkit.guimaker.gate.PermissionGate;
 import com.runtoolkit.guimaker.gate.SoundRegistry;
+import com.runtoolkit.guimaker.item.ItemGuiBinding;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -37,6 +38,10 @@ public final class GuiEditCommand {
     private static final SuggestionProvider<ServerCommandSource> ACTIONS =
             (context, builder) -> suggest(Arrays.stream(ButtonAction.values())
                     .map(value -> value.name().toLowerCase(Locale.ROOT)).toList(),
+                    builder.getRemaining(), builder);
+    private static final SuggestionProvider<ServerCommandSource> CLICK_MODES =
+            (context, builder) -> suggest(Arrays.stream(ItemGuiBinding.ClickMode.values())
+                    .map(ItemGuiBinding.ClickMode::commandName).toList(),
                     builder.getRemaining(), builder);
     private static final SuggestionProvider<ServerCommandSource> ACTION_PARAMETERS =
             (context, builder) -> {
@@ -105,7 +110,17 @@ public final class GuiEditCommand {
                         .then(literal("set")
                                 .then(slotArguments(GuiEditCommand::setItem)))
                         .then(literal("clear")
-                                .then(slotArguments(GuiEditCommand::clearButton))))
+                                .then(slotArguments(GuiEditCommand::clearButton)))
+                        .then(literal("bind")
+                                .then(argument("gui", StringArgumentType.word()).suggests(GUI_IDS)
+                                        .then(argument("page", IntegerArgumentType.integer(0, 9999))
+                                                .executes(context -> bindItem(context, ItemGuiBinding.ClickMode.BOTH))
+                                                .then(argument("click", StringArgumentType.word()).suggests(CLICK_MODES)
+                                                        .executes(context -> bindItem(context,
+                                                                ItemGuiBinding.ClickMode.parse(
+                                                                        StringArgumentType.getString(context, "click"))))))))
+                        .then(literal("unbind").executes(GuiEditCommand::unbindItem))
+                        .then(literal("binding").executes(GuiEditCommand::showItemBinding)))
                 .then(literal("action").requires(PermissionGate::canEditGui)
                         .then(literal("set")
                                 .then(argument("gui", StringArgumentType.word()).suggests(GUI_IDS)
@@ -140,7 +155,9 @@ public final class GuiEditCommand {
             source.sendMessage(Text.literal("/guimaker create <gui> <1-6 rows> <title>").formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("/guimaker edit <gui> [page] — left click: copy held item, right click: clear")
                     .formatted(Formatting.AQUA));
-            source.sendMessage(Text.literal("/guimaker page add|remove ... | item set|clear ... | action set|clear ...")
+            source.sendMessage(Text.literal("/guimaker page add|rename|remove ... | item set|clear ... | action set|clear ...")
+                    .formatted(Formatting.AQUA));
+            source.sendMessage(Text.literal("/guimaker item bind <gui> <page> [right|left|both] | unbind | binding")
                     .formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("/guimaker commands — list gated command presets")
                     .formatted(Formatting.AQUA));
@@ -300,6 +317,42 @@ public final class GuiEditCommand {
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }
+    }
+
+    private static int bindItem(CommandContext<ServerCommandSource> context,
+                                ItemGuiBinding.ClickMode clickMode) throws CommandSyntaxException {
+        try {
+            ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+            String guiId = StringArgumentType.getString(context, "gui");
+            int pageId = IntegerArgumentType.getInteger(context, "page");
+            GuiDefinition gui = GuiRepository.requireGui(guiId);
+            GuiRepository.requirePage(gui.id(), pageId);
+            ItemGuiBinding.bind(player.getMainHandStack(), gui.id(), pageId, clickMode);
+            return success(context.getSource(), "Bound the held item to " + gui.id() + " page "
+                    + pageId + " for " + clickMode.commandName() + " click.");
+        } catch (IllegalArgumentException error) {
+            return error(context.getSource(), error.getMessage());
+        }
+    }
+
+    private static int unbindItem(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        try {
+            ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+            boolean removed = ItemGuiBinding.unbind(player.getMainHandStack());
+            return removed
+                    ? success(context.getSource(), "Removed the GUI binding from the held item.")
+                    : error(context.getSource(), "The held item has no GUI binding.");
+        } catch (IllegalArgumentException error) {
+            return error(context.getSource(), error.getMessage());
+        }
+    }
+
+    private static int showItemBinding(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+        return ItemGuiBinding.read(player.getMainHandStack())
+                .map(binding -> success(context.getSource(), "Held item binding: GUI=" + binding.guiId()
+                        + ", page=" + binding.pageId() + ", click=" + binding.clickMode().commandName()))
+                .orElseGet(() -> error(context.getSource(), "The held item has no GUI binding."));
     }
 
     private static int clearButton(CommandContext<ServerCommandSource> context) {

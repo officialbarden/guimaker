@@ -2,8 +2,10 @@ package com.runtoolkit.guimaker;
 
 import com.runtoolkit.guimaker.data.GuiRepository;
 import com.runtoolkit.guimaker.gate.CommandExecutionGate;
+import com.runtoolkit.guimaker.gate.ItemOpenRateLimitGate;
 import com.runtoolkit.guimaker.gate.RateLimitGate;
 import com.runtoolkit.guimaker.gui.GuiEditCommand;
+import com.runtoolkit.guimaker.item.ItemGuiInteractionHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -20,6 +22,7 @@ public final class GuiMakerMod implements ModInitializer {
     public void onInitialize() {
         CommandRegistrationCallback.EVENT.register(
                 (dispatcher, registryAccess, environment) -> GuiEditCommand.register(dispatcher));
+        ItemGuiInteractionHandler.register();
 
         ServerLifecycleEvents.SERVER_STARTED.register(GuiRepository::load);
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> GuiRepository.close());
@@ -27,6 +30,7 @@ public final class GuiMakerMod implements ModInitializer {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             RateLimitGate.clear(handler.getPlayer().getUuid());
             CommandExecutionGate.clearPlayer(handler.getPlayer().getUuid());
+            ItemOpenRateLimitGate.clear(handler.getPlayer().getUuid());
         });
 
         LOGGER.info("GUI Maker initialized.");

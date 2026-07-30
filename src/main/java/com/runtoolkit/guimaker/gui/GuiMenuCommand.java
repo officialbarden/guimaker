@@ -59,6 +59,12 @@ public final class GuiMenuCommand {
                         .then(argument("gui", StringArgumentType.word()).suggests(GuiMenuCommand::suggestGuiIds)
                                 .executes(context -> execute(context, player ->
                                         DialogMenuManager.showAddPageForm(player, string(context, "gui"))))))
+                .then(literal("bind-item")
+                        .then(argument("gui", StringArgumentType.word()).suggests(GuiMenuCommand::suggestGuiIds)
+                                .then(argument("page", IntegerArgumentType.integer(0, 9999))
+                                        .executes(context -> execute(context, player ->
+                                                DialogMenuManager.showItemBindingForm(player,
+                                                        string(context, "gui"), integer(context, "page")))))))
                 .then(literal("page-options")
                         .then(argument("gui", StringArgumentType.word()).suggests(GuiMenuCommand::suggestGuiIds)
                                 .then(argument("page", IntegerArgumentType.integer(0, 9999))

@@ -3,7 +3,7 @@
   "id": "guimaker",
   "version": "${version}",
   "name": "GUI Maker",
-  "description": "Persistent GUI builder with native dialog menus, gated command presets, allowlisted actions and vanilla chest screens.",
+  "description": "Persistent GUI builder with native dialog menus, item click bindings, gated command presets and allowlisted actions.",
   "authors": ["Legends11", "runtoolkit"],
   "contact": {
     "sources": "https://github.com/runtoolkit/guimaker-fabric"
@@ -13,6 +13,9 @@
   "entrypoints": {
     "main": [
       "com.runtoolkit.guimaker.GuiMakerMod"
+    ],
+    "client": [
+      "com.runtoolkit.guimaker.GuiMakerClient"
     ]
   },
   "depends": {

@@ -7,6 +7,7 @@ import com.runtoolkit.guimaker.data.ButtonDefinition;
 import com.runtoolkit.guimaker.data.GuiDefinition;
 import com.runtoolkit.guimaker.data.GuiRepository;
 import com.runtoolkit.guimaker.data.PageDefinition;
+import com.runtoolkit.guimaker.item.ItemGuiBinding;
 import net.minecraft.dialog.AfterAction;
 import net.minecraft.dialog.DialogActionButtonData;
 import net.minecraft.dialog.DialogButtonData;
@@ -47,6 +48,7 @@ public final class DialogMenuManager {
         EDIT,
         OPEN,
         ADD_PAGE,
+        BIND_ITEM,
         DELETE_GUI,
         DELETE_PAGE;
 
@@ -69,6 +71,8 @@ public final class DialogMenuManager {
                         "Create a new GUI profile or append a page."),
                 runButton("Edit GUI", "guimaker menu list edit 0",
                         "Select a GUI and page to edit."),
+                runButton("Bind Held Item", "guimaker menu list bind_item 0",
+                        "Open a GUI by right-clicking or left-clicking the held item."),
                 runButton("Delete GUI", "guimaker menu delete",
                         "Delete a GUI profile or one of its pages."),
                 runButton("Open GUI", "guimaker menu list open 0",
@@ -126,7 +130,8 @@ public final class DialogMenuManager {
 
     public static void showPageList(ServerPlayerEntity player, MenuMode mode,
                                     String guiId, int listPage) {
-        if (mode != MenuMode.EDIT && mode != MenuMode.OPEN && mode != MenuMode.DELETE_PAGE) {
+        if (mode != MenuMode.EDIT && mode != MenuMode.OPEN
+                && mode != MenuMode.BIND_ITEM && mode != MenuMode.DELETE_PAGE) {
             throw new IllegalArgumentException("This menu mode cannot select pages: " + mode);
         }
         GuiDefinition gui = GuiRepository.requireGui(guiId);
@@ -278,6 +283,33 @@ public final class DialogMenuManager {
                 inputs, actions, 1));
     }
 
+    public static void showItemBindingForm(ServerPlayerEntity player, String guiId, int pageId) {
+        GuiDefinition gui = GuiRepository.requireGui(guiId);
+        PageDefinition page = GuiRepository.requirePage(gui.id(), pageId);
+        List<SingleOptionInputControl.Entry> clickEntries = new ArrayList<>();
+        for (ItemGuiBinding.ClickMode mode : ItemGuiBinding.ClickMode.values()) {
+            clickEntries.add(new SingleOptionInputControl.Entry(
+                    mode.commandName(),
+                    Optional.of(Text.literal(mode.name())),
+                    mode == ItemGuiBinding.ClickMode.BOTH));
+        }
+        List<DialogInput> inputs = List.of(
+                new DialogInput("click", new SingleOptionInputControl(
+                        300, clickEntries, Text.literal("Open On"), true))
+        );
+        List<DialogActionButtonData> actions = List.of(
+                dynamicButton("Bind Held Item",
+                        "guimaker item bind " + gui.id() + " " + page.id() + " $(click)",
+                        "Store the GUI binding in minecraft:custom_data."),
+                runButton("Remove Existing Binding", "guimaker item unbind",
+                        "Remove only the GUI Maker binding from the held item."),
+                runButton("Back", "guimaker menu pages bind_item " + gui.id() + " 0", null)
+        );
+        open(player, dialog("GUI Maker v2.0 - Bind Held Item",
+                "GUI: " + gui.id() + " | Page: " + page.id()
+                        + ". Choose which click opens this page.", inputs, actions, 1));
+    }
+
     public static void showDeleteMenu(ServerPlayerEntity player) {
         List<DialogActionButtonData> actions = List.of(
                 runButton("Delete GUI Profile", "guimaker menu list delete_gui 0",
@@ -319,6 +351,7 @@ public final class DialogMenuManager {
             case EDIT -> "guimaker menu pages edit " + guiId + " 0";
             case OPEN -> "guimaker menu pages open " + guiId + " 0";
             case ADD_PAGE -> "guimaker menu add-page " + guiId;
+            case BIND_ITEM -> "guimaker menu pages bind_item " + guiId + " 0";
             case DELETE_GUI -> "guimaker menu confirm-gui " + guiId;
             case DELETE_PAGE -> "guimaker menu pages delete_page " + guiId + " 0";
         };
@@ -328,6 +361,7 @@ public final class DialogMenuManager {
         return switch (mode) {
             case EDIT -> "guimaker menu page-options " + guiId + " " + pageId;
             case OPEN -> "guimaker open " + guiId + " " + pageId;
+            case BIND_ITEM -> "guimaker menu bind-item " + guiId + " " + pageId;
             case DELETE_PAGE -> "guimaker menu confirm-page " + guiId + " " + pageId;
             default -> throw new IllegalArgumentException("Unsupported page mode: " + mode);
         };
@@ -338,6 +372,7 @@ public final class DialogMenuManager {
             case EDIT -> "GUI Maker v2.0 Menu - Edit";
             case OPEN -> "GUI Maker v2.0 Menu - Open";
             case ADD_PAGE -> "GUI Maker v2.0 Menu - Append a Page";
+            case BIND_ITEM -> "GUI Maker v2.0 Menu - Bind Held Item";
             case DELETE_GUI, DELETE_PAGE -> "GUI Maker v2.0 Menu - Delete";
         };
     }
@@ -346,6 +381,7 @@ public final class DialogMenuManager {
         return switch (mode) {
             case EDIT -> "GUI Maker v2.0 Menu - Edit Page";
             case OPEN -> "GUI Maker v2.0 Menu - Open Page";
+            case BIND_ITEM -> "GUI Maker v2.0 Menu - Bind Held Item";
             case DELETE_PAGE -> "GUI Maker v2.0 Menu - Delete Page";
             default -> throw new IllegalArgumentException("Unsupported page mode: " + mode);
         };
@@ -354,6 +390,7 @@ public final class DialogMenuManager {
     private static String backCommand(MenuMode mode) {
         return switch (mode) {
             case ADD_PAGE -> "guimaker menu create";
+            case BIND_ITEM -> "guimaker menu";
             case DELETE_GUI, DELETE_PAGE -> "guimaker menu delete";
             case EDIT, OPEN -> "guimaker menu";
         };

@@ -12,9 +12,11 @@
 | 8 | Controlled command dispatcher | `GatedCommandExecutor` | PLAYER mode never elevates; SERVER mode uses an explicit level |
 | 9 | Configurable capacity | `LimitsConfig` | Validated GUI and command-preset limits from `limits.json` |
 | 10 | Dialog command routing | `GuiMenuCommand`, `DialogMenuManager` | OP-only routes call existing validated operations |
-| 11 | Safe persistence | `GuiRepository` | Validated JSON, atomic writes and invalid-file backups |
-| 12 | Read-only runtime GUI | `GuiMakerScreenHandler` | Display items cannot be taken or duplicated |
-| 13 | Permission-gated visual editor | `GuiEditorScreenHandler` | Items are copied without consumption; inventories are not moved |
+| 11 | Item binding validation | `ItemGuiBinding`, `ItemGuiInteractionHandler` | Server validates held-item custom data and target page on every click |
+| 12 | Item-open rate limit | `ItemOpenRateLimitGate` | Duplicate callbacks and packet spam cannot repeatedly open screens |
+| 13 | Safe persistence | `GuiRepository` | Validated JSON, atomic writes and invalid-file backups |
+| 14 | Read-only runtime GUI | `GuiMakerScreenHandler` | Display items cannot be taken or duplicated |
+| 15 | Permission-gated visual editor | `GuiEditorScreenHandler` | Items are copied without consumption; inventories are not moved |
 
 Actions are restricted to the `ButtonAction` enum. `OPEN_PAGE` can only open a
 registered page in the same GUI; `PLAY_SOUND` and `GIVE_ITEM` use fixed

@@ -2,8 +2,9 @@
 
 A secure, server-side GUI builder that uses vanilla chest screens. It does not
 require a custom screen or resource pack. Clients do not need the mod when it is
-installed on a dedicated server; for single-player use, install the mod and
-Fabric API on the client.
+installed on a dedicated server for normal GUI and item interactions. Install
+the mod on the client as well to enable left-click-in-air item bindings. For
+single-player use, install the mod and Fabric API on the client.
 
 ## Requirements
 
@@ -75,6 +76,9 @@ Management commands requiring OP level 2:
 /guimaker page remove <gui> <page>
 /guimaker item set <gui> <page> <slot>
 /guimaker item clear <gui> <page> <slot>
+/guimaker item bind <gui> <page> [right|left|both]
+/guimaker item unbind
+/guimaker item binding
 /guimaker action set <gui> <page> <slot> <action> [parameter]
 /guimaker action clear <gui> <page> <slot>
 /guimaker commands
@@ -97,6 +101,7 @@ The main dialog contains:
 - **Create GUI** — create a new profile or append a page with input forms.
 - **Edit GUI** — choose a GUI and page, rename it, open the visual item editor,
   or configure a button's allowlisted action and parameter.
+- **Bind Held Item** — select a GUI, page and right/left/both click mode.
 - **Delete GUI** — delete a profile or page through a confirmation dialog.
 - **Open GUI** — choose a GUI and page to preview.
 
@@ -107,6 +112,45 @@ permission and allowlist gates as the text commands.
 
 The dialogs are built server-side with Minecraft's native dialog API. No custom
 client screen or resource pack is required.
+
+## Item click GUI bindings
+
+An operator can bind the item in their main hand to a GUI page:
+
+```mcfunction
+/guimaker item bind market 0 right
+/guimaker item bind market 0 left
+/guimaker item bind market 0 both
+```
+
+If the click mode is omitted, `both` is used. Inspect or remove the binding with:
+
+```mcfunction
+/guimaker item binding
+/guimaker item unbind
+```
+
+The dialog menu also exposes this workflow through **Bind Held Item**, followed
+by GUI, page and click-mode selection.
+
+The binding is stored in the vanilla `minecraft:custom_data` item component:
+
+```text
+guimaker.open_gui = {gui: "market", page: 0, click: "both"}
+```
+
+No custom registered item component is used, so the item remains safe to sync
+to unmodified clients. Existing custom data is preserved, and `unbind` removes
+only the GUI Maker binding.
+
+Interaction behavior:
+
+- Right-clicking air, blocks or entities opens the bound page.
+- Left-clicking blocks or entities opens the page and cancels the attack/break action.
+- Left-clicking empty air is supported when the client also has this mod installed;
+  the server validates the held item's component before opening anything.
+- Bindings are validated against the current GUI/page registry at click time.
+- A 250 ms per-player gate prevents duplicate callback openings.
 
 ## Allowlisted actions
 
