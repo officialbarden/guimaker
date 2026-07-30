@@ -20,8 +20,10 @@ On first launch, the mod automatically creates an `example` GUI and these files:
 
 - `config/guimaker/guis.json`
 - `config/guimaker/commands.json`
+- `config/guimaker/limits.json`
 
 ```mcfunction
+/guimaker menu
 /guimaker open example
 /guimaker create market 3 Market Menu
 /guimaker edit market 0
@@ -64,22 +66,47 @@ Available to all players:
 Management commands requiring OP level 2:
 
 ```text
+/guimaker menu
 /guimaker create <gui> <1-6 rows> <title>
 /guimaker delete <gui>
 /guimaker edit [gui] [page]
 /guimaker page add <gui> <page> <1-6 rows> <title>
+/guimaker page rename <gui> <page> <title>
 /guimaker page remove <gui> <page>
 /guimaker item set <gui> <page> <slot>
 /guimaker item clear <gui> <page> <slot>
 /guimaker action set <gui> <page> <slot> <action> [parameter]
 /guimaker action clear <gui> <page> <slot>
 /guimaker commands
+/guimaker limits
 /guimaker reload
 ```
 
 `item set` stores every data component of the item in the player's main hand,
 including its custom name, lore and model data. The item is only a GUI display
 item and cannot be removed from the GUI.
+
+## Dialog-based operator menu
+
+Run `/guimaker menu` as an OP level 2+ player to open the Minecraft 1.21.8
+vanilla dialog workflow. It follows the original datapack's menu logic while
+routing every operation through the Fabric mod's validated commands.
+
+The main dialog contains:
+
+- **Create GUI** — create a new profile or append a page with input forms.
+- **Edit GUI** — choose a GUI and page, rename it, open the visual item editor,
+  or configure a button's allowlisted action and parameter.
+- **Delete GUI** — delete a profile or page through a confirmation dialog.
+- **Open GUI** — choose a GUI and page to preview.
+
+GUI, page and button lists are paginated in groups of ten, so the dialog remains
+usable with high limits from `limits.json`. All menu routes require OP level 2,
+and all submitted values still pass through the same ID, row, slot, action,
+permission and allowlist gates as the text commands.
+
+The dialogs are built server-side with Minecraft's native dialog API. No custom
+client screen or resource pack is required.
 
 ## Allowlisted actions
 
@@ -154,14 +181,36 @@ Security behavior:
 5. Commands containing control characters or exceeding 512 characters are rejected.
 6. Each successful execution is written to the server log with preset ID, player and execution mode.
 
+## Configurable capacity limits
+
+GUI and command-preset capacities are controlled by
+`config/guimaker/limits.json`:
+
+```json
+{
+  "format": 1,
+  "max_guis": 512,
+  "max_command_presets": 1024
+}
+```
+
+The default limits are 512 GUIs and 1,024 command presets. Both values may be
+set from 1 to 100,000. Run `/guimaker reload` after editing the file. Use
+`/guimaker limits` to display the currently loaded values.
+
+If a configured limit is lower than the number of entries in an existing file,
+entries above that limit are skipped during loading and a warning is written to
+the server log.
+
 ## Persistence and limits
 
 - GUI file: `config/guimaker/guis.json`
 - Command allowlist: `config/guimaker/commands.json`
+- Capacity settings: `config/guimaker/limits.json`
 - Every GUI change is saved immediately using an atomic file replacement.
 - Invalid files are backed up as `*.broken-<date>.json`.
-- Maximum of 128 GUIs, 64 pages per GUI and 1-6 rows per page.
-- Maximum of 256 command presets.
+- GUI and command-preset limits are read from `limits.json`.
+- Each GUI may contain up to 64 pages with 1-6 rows per page.
 - The last GUI and the last page in a GUI cannot be removed accidentally.
 - General button clicks are rate-limited to one action per player every 150 ms.
 - Command actions also have their own per-preset cooldown.

@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import com.runtoolkit.guimaker.action.ButtonAction;
+import com.runtoolkit.guimaker.config.LimitsConfig;
 import com.runtoolkit.guimaker.gate.ActionAllowlistGate;
 import com.runtoolkit.guimaker.gate.CommandPresetRegistry;
 import net.fabricmc.loader.api.FabricLoader;
@@ -43,7 +44,6 @@ public final class GuiRepository {
     private static final Logger LOGGER = LoggerFactory.getLogger("guimaker");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final int FORMAT_VERSION = 1;
-    private static final int MAX_GUIS = 128;
     private static final TreeMap<String, GuiDefinition> GUIS = new TreeMap<>();
     private static final Path CONFIG_FILE = FabricLoader.getInstance().getConfigDir()
             .resolve("guimaker").resolve("guis.json");
@@ -54,6 +54,7 @@ public final class GuiRepository {
 
     public static synchronized void load(MinecraftServer minecraftServer) {
         server = minecraftServer;
+        LimitsConfig.load();
         CommandPresetRegistry.load();
         GUIS.clear();
 
@@ -71,11 +72,14 @@ public final class GuiRepository {
                 throw new IllegalArgumentException("The 'guis' array is missing");
             }
             for (JsonElement element : guis) {
+                if (GUIS.size() >= LimitsConfig.maxGuis()) {
+                    LOGGER.warn("GUI limit ({}) reached; remaining entries were skipped.",
+                            LimitsConfig.maxGuis());
+                    break;
+                }
                 try {
                     GuiDefinition gui = decodeGui(element.getAsJsonObject());
-                    if (GUIS.size() < MAX_GUIS) {
-                        GUIS.put(gui.id(), gui);
-                    }
+                    GUIS.put(gui.id(), gui);
                 } catch (Exception entryError) {
                     LOGGER.warn("Skipped invalid GUI entry: {}", entryError.getMessage());
                 }
@@ -146,8 +150,8 @@ public final class GuiRepository {
         if (GUIS.containsKey(id)) {
             throw new IllegalArgumentException("This GUI already exists: " + id);
         }
-        if (GUIS.size() >= MAX_GUIS) {
-            throw new IllegalArgumentException("The server can contain at most " + MAX_GUIS + " GUIs.");
+        if (GUIS.size() >= LimitsConfig.maxGuis()) {
+            throw new IllegalArgumentException("The server can contain at most " + LimitsConfig.maxGuis() + " GUIs (limits.json).");
         }
         GuiDefinition gui = new GuiDefinition(id);
         gui.addPage(new PageDefinition(0, title, rows));
@@ -170,6 +174,11 @@ public final class GuiRepository {
 
     public static synchronized void addPage(String guiId, int pageId, int rows, String title) {
         requireGui(guiId).addPage(new PageDefinition(pageId, title, rows));
+        save();
+    }
+
+    public static synchronized void renamePage(String guiId, int pageId, String title) {
+        requirePage(guiId, pageId).setTitle(title);
         save();
     }
 

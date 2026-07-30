@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.runtoolkit.guimaker.action.ButtonAction;
+import com.runtoolkit.guimaker.config.LimitsConfig;
 import com.runtoolkit.guimaker.data.GuiDefinition;
 import com.runtoolkit.guimaker.data.GuiRepository;
 import com.runtoolkit.guimaker.data.PageDefinition;
@@ -58,8 +59,11 @@ public final class GuiEditCommand {
                 .executes(context -> help(context.getSource()))
                 .then(literal("help").executes(context -> help(context.getSource())))
                 .then(literal("list").executes(context -> list(context.getSource())))
+                .then(GuiMenuCommand.build())
                 .then(literal("commands").requires(PermissionGate::canEditGui)
                         .executes(context -> listCommandPresets(context.getSource())))
+                .then(literal("limits").requires(PermissionGate::canEditGui)
+                        .executes(context -> listLimits(context.getSource())))
                 .then(literal("open")
                         .then(argument("gui", StringArgumentType.word()).suggests(GUI_IDS)
                                 .executes(context -> open(context, null))
@@ -88,6 +92,11 @@ public final class GuiEditCommand {
                                                 .then(argument("rows", IntegerArgumentType.integer(1, 6))
                                                         .then(argument("title", StringArgumentType.greedyString())
                                                                 .executes(GuiEditCommand::addPage))))))
+                        .then(literal("rename")
+                                .then(argument("gui", StringArgumentType.word()).suggests(GUI_IDS)
+                                        .then(argument("page", IntegerArgumentType.integer(0, 9999))
+                                                .then(argument("title", StringArgumentType.greedyString())
+                                                        .executes(GuiEditCommand::renamePage)))))
                         .then(literal("remove")
                                 .then(argument("gui", StringArgumentType.word()).suggests(GUI_IDS)
                                         .then(argument("page", IntegerArgumentType.integer(0, 9999))
@@ -126,12 +135,16 @@ public final class GuiEditCommand {
         source.sendMessage(Text.literal("GUI Maker commands").formatted(Formatting.GOLD, Formatting.BOLD));
         source.sendMessage(Text.literal("/guimaker list | open <gui> [page]").formatted(Formatting.YELLOW));
         if (PermissionGate.canEditGui(source)) {
+            source.sendMessage(Text.literal("/guimaker menu — open the dialog-based operator menu")
+                    .formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("/guimaker create <gui> <1-6 rows> <title>").formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("/guimaker edit <gui> [page] — left click: copy held item, right click: clear")
                     .formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("/guimaker page add|remove ... | item set|clear ... | action set|clear ...")
                     .formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("/guimaker commands — list gated command presets")
+                    .formatted(Formatting.AQUA));
+            source.sendMessage(Text.literal("/guimaker limits — show limits.json values")
                     .formatted(Formatting.AQUA));
             source.sendMessage(Text.literal("Slot numbers start at 0.").formatted(Formatting.GRAY));
         }
@@ -146,6 +159,17 @@ public final class GuiEditCommand {
             source.sendMessage(Text.literal("- " + gui.id() + " (pages: " + pages + ")")
                     .formatted(Formatting.YELLOW));
         }
+        return 1;
+    }
+
+    private static int listLimits(ServerCommandSource source) {
+        source.sendMessage(Text.literal("GUI Maker limits:").formatted(Formatting.GOLD));
+        source.sendMessage(Text.literal("- max_guis: " + LimitsConfig.maxGuis())
+                .formatted(Formatting.YELLOW));
+        source.sendMessage(Text.literal("- max_command_presets: " + LimitsConfig.maxCommandPresets())
+                .formatted(Formatting.YELLOW));
+        source.sendMessage(Text.literal("Edit config/guimaker/limits.json and run /guimaker reload to apply changes.")
+                .formatted(Formatting.GRAY));
         return 1;
     }
 
@@ -236,6 +260,18 @@ public final class GuiEditCommand {
             String title = StringArgumentType.getString(context, "title");
             GuiRepository.addPage(id, page, rows, title);
             return success(context.getSource(), id + ": page added: " + page);
+        } catch (IllegalArgumentException error) {
+            return error(context.getSource(), error.getMessage());
+        }
+    }
+
+    private static int renamePage(CommandContext<ServerCommandSource> context) {
+        try {
+            String id = StringArgumentType.getString(context, "gui");
+            int page = IntegerArgumentType.getInteger(context, "page");
+            String title = StringArgumentType.getString(context, "title");
+            GuiRepository.renamePage(id, page, title);
+            return success(context.getSource(), "Page renamed: " + page);
         } catch (IllegalArgumentException error) {
             return error(context.getSource(), error.getMessage());
         }

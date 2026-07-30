@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.runtoolkit.guimaker.config.LimitsConfig;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,6 @@ public final class CommandPresetRegistry {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private static final Pattern VALID_ID = Pattern.compile("[a-z0-9_.-]{1,64}");
     private static final Pattern CONTROL_CHARACTER = Pattern.compile("[\\p{Cntrl}]");
-    private static final int MAX_PRESETS = 256;
     private static final int MAX_COMMAND_LENGTH = 512;
     private static final long MIN_COOLDOWN_MS = 250L;
     private static final long MAX_COOLDOWN_MS = 3_600_000L;
@@ -78,8 +78,9 @@ public final class CommandPresetRegistry {
             for (JsonElement element : commands) {
                 try {
                     CommandPreset preset = decode(element.getAsJsonObject());
-                    if (PRESETS.size() >= MAX_PRESETS) {
-                        LOGGER.warn("Command preset limit reached; remaining entries were skipped.");
+                    if (PRESETS.size() >= LimitsConfig.maxCommandPresets()) {
+                        LOGGER.warn("Command preset limit ({}) reached; remaining entries were skipped.",
+                                LimitsConfig.maxCommandPresets());
                         break;
                     }
                     if (PRESETS.putIfAbsent(preset.id(), preset) != null) {
