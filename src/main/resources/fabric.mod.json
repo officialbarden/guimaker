@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "guimaker",
-  "version": "1.0.0",
+  "version": "${version}",
   "name": "GUI Maker (Fabric Port)",
   "description": "Gated, security-focused GUI builder. Closes the arbitrary function/command execution vulnerability present in the original datapack.",
   "authors": ["Legends11", "runtoolkit"],
