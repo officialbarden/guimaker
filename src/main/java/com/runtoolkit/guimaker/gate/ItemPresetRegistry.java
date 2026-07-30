@@ -30,4 +30,8 @@ public final class ItemPresetRegistry {
     public static boolean isRegistered(String presetId) {
         return presetId != null && ALLOWED_PRESETS.contains(presetId);
     }
+
+    public static java.util.Set<String> ids() {
+        return java.util.Collections.unmodifiableSet(ALLOWED_PRESETS);
+    }
 }

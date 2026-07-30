@@ -33,4 +33,8 @@ public final class SoundRegistry {
     public static boolean isRegistered(String soundId) {
         return soundId != null && ALLOWED_SOUNDS.contains(soundId);
     }
+
+    public static java.util.Set<String> ids() {
+        return java.util.Collections.unmodifiableSet(ALLOWED_SOUNDS);
+    }
 }

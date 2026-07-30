@@ -1,29 +1,31 @@
 package com.runtoolkit.guimaker;
 
+import com.runtoolkit.guimaker.data.GuiRepository;
 import com.runtoolkit.guimaker.gate.RateLimitGate;
 import com.runtoolkit.guimaker.gui.GuiEditCommand;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * GuiMakerMod — The "entrypoint" class specified in fabric.mod.json.
- * onInitialize() is called ONCE when the server starts (per the
- * ModInitializer interface). Commands and event listeners are registered here.
- */
+/** GUI Maker Fabric entry point. */
 public final class GuiMakerMod implements ModInitializer {
+    public static final String MOD_ID = "guimaker";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
     public void onInitialize() {
-        // Register commands (/guimaker edit, etc.) — PermissionGate is enforced here.
         CommandRegistrationCallback.EVENT.register(
-                (dispatcher, registryAccess, environment) -> GuiEditCommand.register(dispatcher)
-        );
+                (dispatcher, registryAccess, environment) -> GuiEditCommand.register(dispatcher));
 
-        // Clear a player's RateLimitGate record on disconnect (to prevent a
-        // memory leak — per the TPS/performance rule).
+        ServerLifecycleEvents.SERVER_STARTED.register(GuiRepository::load);
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> GuiRepository.close());
+
         ServerPlayConnectionEvents.DISCONNECT.register(
-                (handler, server) -> RateLimitGate.clear(handler.getPlayer().getUuid())
-        );
+                (handler, server) -> RateLimitGate.clear(handler.getPlayer().getUuid()));
+
+        LOGGER.info("GUI Maker başlatıldı.");
     }
 }
