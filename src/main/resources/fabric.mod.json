@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "guimaker",
+  "version": "${version}",
+  "name": "GUI Maker",
+  "description": "World-scoped GUI builder with persistent widgets, context-safe placeholders, audited command gates and native dialogs.",
+  "authors": [
+    "Legends11",
+    "GUI Maker contributors"
+  ],
+  "contact": {
+    "sources": "https://github.com/officialbarden/guimaker"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.guimaker.GuiMakerMod"
+    ],
+    "client": [
+      "dev.guimaker.GuiMakerClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.8",
+    "java": ">=21"
+  }
+}

@@ -1,0 +1,7 @@
+.gradle/
+build/
+run/
+!src/main/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.zip

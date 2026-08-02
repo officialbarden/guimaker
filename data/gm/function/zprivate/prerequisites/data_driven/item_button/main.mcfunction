@@ -1,1 +1,0 @@
-$data modify storage gm:storage temp.data_driven.menu_layout append from storage gm:storage GUI[{GUI_ID:$(GUI_ID)}].PAGES[{PAGE:$(PAGE)}].PAGE_CONTENTS[{"components":{"minecraft:custom_data":{"gui":{"item":"data_driven_button"}}}}]

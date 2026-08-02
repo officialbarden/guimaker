@@ -1,8 +1,0 @@
-{
-  "pack": {
-    "description": "GUI Maker 2",
-    "pack_format": 64,
-    "min_format": 64,
-    "max_format": 999
-  }
-}

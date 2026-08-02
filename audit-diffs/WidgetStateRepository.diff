@@ -1,0 +1,31 @@
+--- audit-before/src/main/java/dev/guimaker/widget/WidgetStateRepository.java	2026-07-30 14:20:43.127910717 +0000
++++ src/main/java/dev/guimaker/widget/WidgetStateRepository.java	2026-07-30 14:25:30.244641192 +0000
+@@ -50,14 +50,24 @@
+     }
+ 
+     public static boolean acquireHolder(WidgetDefinition widget, ServerPlayerEntity player) {
+-        String lockKey = holderLockKey(widget, player);
+-        UUID owner = player.getUuid();
++        return tryAcquireHolderLock(holderLockKey(widget, player), player.getUuid());
++    }
++
++    public static void releaseHolder(WidgetDefinition widget, ServerPlayerEntity player) {
++        releaseHolderLock(holderLockKey(widget, player), player.getUuid());
++    }
++
++    static boolean tryAcquireHolderLock(String lockKey, UUID owner) {
+         UUID existing = HOLDER_LOCKS.putIfAbsent(lockKey, owner);
+         return existing == null || existing.equals(owner);
+     }
+ 
+-    public static void releaseHolder(WidgetDefinition widget, ServerPlayerEntity player) {
+-        HOLDER_LOCKS.remove(holderLockKey(widget, player), player.getUuid());
++    static void releaseHolderLock(String lockKey, UUID owner) {
++        HOLDER_LOCKS.remove(lockKey, owner);
++    }
++
++    static void clearHolderLocks() {
++        HOLDER_LOCKS.clear();
+     }
+ 
+     public static synchronized boolean getToggle(WidgetDefinition widget, ServerPlayerEntity player) {
